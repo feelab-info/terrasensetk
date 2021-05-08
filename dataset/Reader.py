@@ -1,5 +1,21 @@
 import sentinelhub as sh
 import geopandas as gdp
+import matplotlib.pyplot as plt
+ """
+            change location of lucas from meta_info to vector
+            
+            Get the images
+            Define which bboxes have groundtruth
+
+            Define the pipeline for writing the eopatches
+                allow for setting the bands needed
+                allow for adding extra tasks?
+                allow for adding addicional indexes
+            
+            add type check to arguments
+            
+
+        """
 class Reader():
 
     def __init__(self,shapefile,bands, country, config=null,eopatch_size = 500):
@@ -11,12 +27,7 @@ class Reader():
 
         dataset = world[world.name==self.country]
         self.dataset = dataset.to_crs(sh.CRS.WGS84.pyproj_crs())
-        """
-            See which library has the shapefiles, create a dictionary with the shapes and a key for each country
-            Figure out a way how to create bboxes for all countries(maybe get the length and aim for 500m eopatches)
-            change location of lucas from meta_info to vector
-            Get the images
-        """
+       
     
     def get_bbox(self, dataset,expected_bbox_size=2000,reset=False):
         """Creates a grid of bbox over the dataset
@@ -79,8 +90,10 @@ class Reader():
         self.dataset(ax=ax, facecolor='w', edgecolor='b', alpha=0.5)
         if(self.ground_truth_bbox != null):
              self.ground_truth_bbox.plot(ax=ax, facecolor='g', edgecolor='black',alpha=0.7)
-        if(save_img != null) :
+        if(save_img != null):
             plt.savefig(os.path.join(save_img,self._country+".png")
+        else:
+            plt.show()
 
         
 
