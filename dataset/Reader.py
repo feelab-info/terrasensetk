@@ -10,6 +10,7 @@ class Reader():
         self._world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
 
         dataset = world[world.name==self.country]
+        self.dataset = dataset.to_crs(sh.CRS.WGS84.pyproj_crs())
         """
             See which library has the shapefiles, create a dictionary with the shapes and a key for each country
             Figure out a way how to create bboxes for all countries(maybe get the length and aim for 500m eopatches)
@@ -28,7 +29,8 @@ class Reader():
         Returns:
             GeoDataFrame: GeoDataFrame of the dataset divided in square bbox of size of ´expected_bbox_size´.
         """
-        if(self._dataset_bbox != null || reset == False) return self._dataset_bbox
+        if(self._dataset_bbox != null || reset == False):
+             return self._dataset_bbox
 
         dataset_shape = dataset.to_crs("EPSG:3395").geometry.values[0]
 
@@ -43,8 +45,42 @@ class Reader():
         geometry = [Polygon(bbox.get_polygon()) for bbox in dataset_bbox_splitter.get_bbox_list()]
         self._dataset_bbox = gpd.GeoDataFrame(crs=sh.CRS.WGS84, geometry=geometry)
         return self._dataset_bbox
-        
-    def plot_dataset(self):
-        
+    
+    #should probably be in a utils module
+    @staticmethod
+    def get_time_interval(middle_date, number_of_days):
+        """
+        Gets the time interval surrounding the middle date separated by slashes
+        Args:
+            middle_date: A string containing the date which will be included in the timerange
+            number_of_days: The number of days counting from the `middle_date` that will correspond to the min and max date
+            
+        Returns:
+            A list with the ´number_of_days´ before and after of the ´middle_date´
+            
+        Example:
+            >>> get_time_interval("15/09/1998", 3)
+            >>> ['1998-09-12', '1998-09-18']
+            
+        """
+        point_date = datetime.datetime.strptime(middle_date, '%d/%m/%y')
+        days_before = point_date - datetime.timedelta(days=number_of_days)
+        days_after = point_date + datetime.timedelta(days=number_of_days)
+        return [days_before.strftime('%Y-%m-%d'), days_after.strftime('%Y-%m-%d')]
+
+    def plot_dataset(self,save_img=null):
+        """Plots the existing information in matplotlib
+
+        Args:
+            save_img (string, optional): Path to where the plot should be saved. Defaults to null.
+        """
+        plt, ax = plt.subplots(figsize=(400,400))
+        self._dataset_bbox.plot(ax=ax,facecolor='w',edgecolor='r', alpha=0.4)
+        self.dataset(ax=ax, facecolor='w', edgecolor='b', alpha=0.5)
+        if(self.ground_truth_bbox != null):
+             self.ground_truth_bbox.plot(ax=ax, facecolor='g', edgecolor='black',alpha=0.7)
+        if(save_img != null) :
+            plt.savefig(os.path.join(save_img,self._country+".png")
+
         
 
