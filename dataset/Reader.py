@@ -1,36 +1,62 @@
 import sentinelhub as sh
 import geopandas as gdp
 import matplotlib.pyplot as plt
- """
-            change location of lucas from meta_info to vector
-            
-            Get the images
-            Define which bboxes have groundtruth
+import ArgChecker.ArgChecker as type_check
+    """
+        change location of lucas from meta_info to vector
+        
+        Get the images
+        Define which bboxes have groundtruth
 
-            Define the pipeline for writing the eopatches
-                allow for setting the bands needed
-                allow for adding extra tasks?
-                allow for adding addicional indexes
-            
-            add type check to arguments
-            
-
-        """
+        Define the pipeline for writing the eopatches
+            allow for setting the bands needed
+            allow for adding extra tasks?
+            allow for adding addicional indexes
+        
+        add type check to arguments
+        need to define the lucas_copernicus csv
+    """
 class Reader():
 
     def __init__(self,shapefile,bands, country, config=null,eopatch_size = 500):
         self._shapefile = shapefile
         self._bands = bands
-        self._country = country
+        self._country = country #should change to region
         self._eopatch_size = eopatch_size;
         self._world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
 
         dataset = world[world.name==self.country]
         self.dataset = dataset.to_crs(sh.CRS.WGS84.pyproj_crs())
        
+    def get_groundtruth():
+        """[summary]
+
+        Returns:
+            GeoDataFrame: Contains the groundtruth data within the given region
+        """
+        if self._groundtruth_points != null:
+            return self._groundtruth_points
+        self._groundtruth_points = gpd.sjoin(self.ground_truth,self.dataset,op="within",how="left").drop("index_right", axis="columns")
+        return self._groundtruth_points
+
+    def get_bbox_with_data():
+        """[summary]
+
+        Returns:
+            GeoDataFrame: Contains the bboxes which have associated groundtruth
+        """
+        if self._bbox_with_groundtruth != null:
+            return self._bbox_with_groundtruth
+
+        self._bbox_with_groundtruth = gpd.sjoin(self.get_bbox(),self.get_groundtruth(),op='overlaps',how='inner')
+        self._bbox_with_groundtruth.append(gpd.sjoin(self.get_bbox(),self.get_groundtruth(),op='contains',how='inner'))
+        return self._bbox_with_groundtruth
     
-    def get_bbox(self, dataset,expected_bbox_size=2000,reset=False):
-        """Creates a grid of bbox over the dataset
+    @type_check()
+    def get_bbox(self,expected_bbox_size=2000:int,reset=False:bool):
+
+        """
+        Creates a grid of bbox over the dataset
 
         Args:
             dataset (GeoDataFrame): [description]
@@ -40,10 +66,11 @@ class Reader():
         Returns:
             GeoDataFrame: GeoDataFrame of the dataset divided in square bbox of size of ´expected_bbox_size´.
         """
+
         if(self._dataset_bbox != null || reset == False):
              return self._dataset_bbox
 
-        dataset_shape = dataset.to_crs("EPSG:3395").geometry.values[0]
+        dataset_shape = self.dataset.to_crs("EPSG:3395").geometry.values[0]
 
         height = dataset_shape.bounds[2] - dataset_shape.bounds[0]
         width = dataset_shape.bounds[3] - dataset_shape.bounds[1]
@@ -51,7 +78,7 @@ class Reader():
         bbox_num_y =  int(height/expected_bbox_size)
         bbox_num_x =  int(width/expected_bbox_size)
 
-        dataset_bbox_splitter = sh.BBoxSplitter(dataset.geometry.to_list(),sh.CRS.WGS84,(bbox_num_y,bbox_num_x))
+        dataset_bbox_splitter = sh.BBoxSplitter(self.dataset.geometry.to_list(),sh.CRS.WGS84,(bbox_num_y,bbox_num_x))
 
         geometry = [Polygon(bbox.get_polygon()) for bbox in dataset_bbox_splitter.get_bbox_list()]
         self._dataset_bbox = gpd.GeoDataFrame(crs=sh.CRS.WGS84, geometry=geometry)
