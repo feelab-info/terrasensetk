@@ -5,14 +5,18 @@ import pandas as pd
 from shapely.geometry import Polygon
 import sys
 import os
-from utils import get_lucas_copernicus_path
+import datetime
+
+from ..utils import get_lucas_copernicus_path, get_time_interval, FilterVectorToRaster
+from eolearn.io.processing_api import SentinelHubInputTask
+from sentinelhub import BBox, DataCollection
+from eolearn.core import EOTask, EOPatch, LinearWorkflow, FeatureType, OverwritePermission, \
+    LoadTask, SaveTask, EOExecutor, ExtractBandsTask, MergeFeatureTask, AddFeature
 #from .utils from ArgChecker
 """
         change location of lucas from meta_info to vector
         
         Get the images
-        Define which bboxes have groundtruth
-
         Define the pipeline for writing the eopatches
             allow for setting the bands needed
             allow for adding extra tasks?
@@ -22,23 +26,23 @@ from utils import get_lucas_copernicus_path
         need to define the lucas_copernicus csv
     """
 class Reader:
+
+
     def __init__(self,shapefile = None,bands = None, country = None, config=None, eopatch_size = 500):
         self._init_classvars()
         if(shapefile is not None):
-            dataset = gpd.read_file(shapefile)
+            self.dataset = gpd.read_file(shapefile)
         elif(country is not None):
             self._world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
-            dataset = self._world[self._world.name==country]
+            self.dataset = self._world[self._world.name==country]
         else:
-            ValueError("Either the shapefile or country must be provided");
+            ValueError("Either the shapefile or country must be provided")
 
         self._bands = bands
-        self._eopatch_size = eopatch_size;
-         
-
-        self.dataset = dataset.to_crs(sh.CRS.WGS84.pyproj_crs())
-        #self.dataset.buffer(20)
+        self._eopatch_size = eopatch_size
+        self.dataset = self.dataset.to_crs(sh.CRS.WGS84.pyproj_crs())
     
+
     def get_groundtruth(self):
         """
 
@@ -51,6 +55,7 @@ class Reader:
         groundtruth_gdf = pd.read_pickle(get_lucas_copernicus_path(),compression='bz2')
         self._groundtruth_points = gpd.sjoin(groundtruth_gdf,self.dataset,op="within",how="inner").drop("index_right", axis="columns")
         return self._groundtruth_points
+
 
     def get_bbox_with_data(self):
         """
@@ -65,7 +70,7 @@ class Reader:
         self._bbox_with_groundtruth = self._bbox_with_groundtruth.append(gpd.sjoin(self.get_bbox(),self.get_groundtruth(),op='contains',how='inner'))
         return self._bbox_with_groundtruth
     
-   # @type_check()
+   
     def get_bbox(self,expected_bbox_size=2000,reset=False):
 
         """
@@ -97,26 +102,6 @@ class Reader:
         self._dataset_bbox = gpd.GeoDataFrame(crs=sh.CRS.WGS84.pyproj_crs(), geometry=geometry)
         return self._dataset_bbox
     
-    #should probably be in a utils module
-    def get_time_interval(middle_date, number_of_days):
-        """
-        Gets the time interval surrounding the middle date separated by slashes
-        Args:
-            middle_date: A string containing the date which will be included in the timerange
-            number_of_days: The number of days counting from the `middle_date` that will correspond to the min and max date
-            
-        Returns:
-            A list with the ´number_of_days´ before and after of the ´middle_date´
-            
-        Example:
-            >>> get_time_interval("15/09/1998", 3)
-            >>> ['1998-09-12', '1998-09-18']
-            
-        """
-        point_date = datetime.datetime.strptime(middle_date, '%d/%m/%y')
-        days_before = point_date - datetime.timedelta(days=number_of_days)
-        days_after = point_date + datetime.timedelta(days=number_of_days)
-        return [days_before.strftime('%Y-%m-%d'), days_after.strftime('%Y-%m-%d')]
 
     def plot_dataset(self,save_img=None):
         """Plots the existing information in matplotlib
@@ -135,12 +120,48 @@ class Reader:
         else:
             plt.show()
 
+
     def _init_classvars(self):
+        self.dataset = None
         self._groundtruth_points = None
         self._dataset_bbox = None
         self._bbox_with_groundtruth = None
-        self._ground_truth = None
-
+        self._ground_truth = None        
     
-        
+    def download_images(self,path):
+        if not os.path.isdir(path):
+            os.makedirs(path)
 
+        add_data = SentinelHubInputTask(
+            bands_feature=(FeatureType.DATA, 'BANDS'),
+            resolution=10,
+            maxcc=0.8,
+            time_difference=datetime.timedelta(minutes=120),
+            data_collection=DataCollection.SENTINEL2_L1C,
+            max_threads=5
+        )
+        
+        save = SaveTask(path, overwrite_permission=OverwritePermission.OVERWRITE_PATCH)
+        add_lucas = AddFeature((FeatureType.META_INFO,"LUCAS_DATA"))
+        add_lucas_raster = FilterVectorToRaster(raster_feature=(FeatureType.MASK_TIMELESS,"GROUND_TRUTH"),values=1,raster_resolution=10)
+
+        workflow = LinearWorkflow(add_data,add_lucas,add_lucas_raster,save)
+
+        execution_args = []
+        for id, wrap_bbox in enumerate(self.get_bbox_with_data().head().iterrows()):
+            i, bbox = wrap_bbox
+
+            #lucas_points_intersection = portugal_gdf[portugal_gdf.intersects(bbox)]
+            #time_interval = []
+            #for point in bbox.SURVEY_DATE:
+            time_interval = (get_time_interval(bbox.SURVEY_DATE,5))
+            execution_args.append({
+                add_data:{'bbox': BBox(bbox.geometry,crs=self.dataset.crs), 'time_interval': time_interval},
+                add_lucas:{'data': bbox.drop("geometry")},
+                add_lucas_raster:{'dataset':bbox.geometry},
+                save: {'eopatch_folder': f'eopatch_{id}'}
+            })
+        executor = EOExecutor(workflow, execution_args, save_logs=True)
+        executor.run(workers=5, multiprocess=False)
+
+        executor.make_report()
