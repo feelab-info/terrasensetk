@@ -50,16 +50,16 @@ def parse_table_to_dict(html_table):
 #target third td from the table with class matrix
 #get_indexes_from_bands()
 
-from html.parser import HTMLParser
-import urllib.request as urllib2
-from bs4 import BeautifulSoup as bs
+#from html.parser import HTMLParser
+#import urllib.request as urllib2
+#from bs4 import BeautifulSoup as bs
 
-link = r'https://www.indexdatabase.de/db/is.php?sensor_id=96'
+#link = r'https://www.indexdatabase.de/db/is.php?sensor_id=96'
 
-html_page = urllib2.urlopen(link)
-soup = bs(html_page)
-tables = soup.findAll("table")
-print(tables[0])
+#html_page = urllib2.urlopen(link)
+#soup = bs(html_page)
+#tables = soup.findAll("table")
+#print(tables[0])
 #procurar dentro dos mi o valor e comparar com as merdinhas que tenho
 
 #for table in tables:
