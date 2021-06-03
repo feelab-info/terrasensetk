@@ -12,6 +12,8 @@ from eolearn.io.processing_api import SentinelHubInputTask
 from sentinelhub import BBox, DataCollection
 from eolearn.core import EOTask, EOPatch, LinearWorkflow, FeatureType, OverwritePermission, \
     LoadTask, SaveTask, EOExecutor, ExtractBandsTask, MergeFeatureTask, AddFeature
+from eolearn.geometry import VectorToRaster
+
 #from .utils from ArgChecker
 """
         change location of lucas from meta_info to vector
@@ -142,10 +144,13 @@ class Reader:
         )
         
         save = SaveTask(path, overwrite_permission=OverwritePermission.OVERWRITE_PATCH)
-        add_lucas = AddFeature((FeatureType.META_INFO,"LUCAS_DATA"))
-        add_lucas_raster = FilterVectorToRaster(raster_feature=(FeatureType.MASK_TIMELESS,"GROUND_TRUTH"),values=1,raster_resolution=10)
+        add_vector = AddFeature((FeatureType.VECTOR_TIMELESS,"LOCATION"))
 
-        workflow = LinearWorkflow(add_data,add_lucas,add_lucas_raster,save)
+        add_lucas = AddFeature((FeatureType.META_INFO,"LUCAS_DATA"))
+        add_raster = VectorToRaster((FeatureType.VECTOR_TIMELESS,"LOCATION"),(FeatureType.MASK_TIMELESS,"GROUND_TRUTH_LOCATION"), values=1, raster_resolution=10)
+        #add_lucas_raster = FilterVectorToRaster(raster_feature=(FeatureType.MASK_TIMELESS,"GROUND_TRUTH"),values=1,raster_resolution=10)
+
+        workflow = LinearWorkflow(add_data,add_vector,add_lucas,add_raster,save)
 
         execution_args = []
         for id, wrap_bbox in enumerate(self.get_bbox_with_data().head().iterrows()):
@@ -154,11 +159,16 @@ class Reader:
             #lucas_points_intersection = portugal_gdf[portugal_gdf.intersects(bbox)]
             #time_interval = []
             #for point in bbox.SURVEY_DATE:
+            print(bbox)
             time_interval = (get_time_interval(bbox.SURVEY_DATE,5))
+            gdf = gpd.GeoDataFrame(bbox,crs=sh.CRS.WGS84.pyproj_crs())
+            gdf.set_geometry('geometry')
             execution_args.append({
+                add_vector:{'data': gdf},
                 add_data:{'bbox': BBox(bbox.geometry,crs=self.dataset.crs), 'time_interval': time_interval},
                 add_lucas:{'data': bbox.drop("geometry")},
-                add_lucas_raster:{'dataset':bbox.geometry},
+                
+                #add_lucas_raster:{'dataset':bbox},
                 save: {'eopatch_folder': f'eopatch_{id}'}
             })
         executor = EOExecutor(workflow, execution_args, save_logs=True)
