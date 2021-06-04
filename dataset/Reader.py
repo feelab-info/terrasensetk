@@ -162,6 +162,9 @@ class Reader:
             print(bbox)
             time_interval = (get_time_interval(bbox.SURVEY_DATE,5))
             gdf = gpd.GeoDataFrame(bbox,crs=sh.CRS.WGS84.pyproj_crs())
+            gdf = gdf.transpose()
+            gdf = gdf.rename(columns={0:'geometry'}).set_geometry('geometry')
+
             gdf.set_geometry('geometry')
             execution_args.append({
                 add_vector:{'data': gdf},
