@@ -1,3 +1,6 @@
+from terrasensetk.utils.eotasks import EuclideanNorm, SentinelHubValidData
+from ..utils import get_lucas_copernicus_path, get_time_interval, FilterVectorToRaster
+
 import sentinelhub as sh
 import geopandas as gpd
 import matplotlib.pyplot as plt
@@ -7,11 +10,11 @@ import sys
 import os
 import datetime
 
-from ..utils import get_lucas_copernicus_path, get_time_interval, FilterVectorToRaster
 from eolearn.io.processing_api import SentinelHubInputTask
 from sentinelhub import BBox, DataCollection
 from eolearn.core import EOTask, EOPatch, LinearWorkflow, FeatureType, OverwritePermission, \
     LoadTask, SaveTask, EOExecutor, ExtractBandsTask, MergeFeatureTask, AddFeature
+from eolearn.mask import AddCloudMaskTask, get_s2_pixel_cloud_detector, AddValidDataMaskTask
 from eolearn.geometry import VectorToRaster
 
 #from .utils from ArgChecker
@@ -147,10 +150,18 @@ class Reader:
         add_vector = AddFeature((FeatureType.VECTOR_TIMELESS,"LOCATION"))
 
         add_lucas = AddFeature((FeatureType.META_INFO,"LUCAS_DATA"))
-        add_raster = VectorToRaster((FeatureType.VECTOR_TIMELESS,"LOCATION"),(FeatureType.MASK_TIMELESS,"GROUND_TRUTH_LOCATION"), values=1, raster_resolution=10)
-        #add_lucas_raster = FilterVectorToRaster(raster_feature=(FeatureType.MASK_TIMELESS,"GROUND_TRUTH"),values=1,raster_resolution=10)
+        add_raster = VectorToRaster((FeatureType.VECTOR_TIMELESS,"LOCATION"),(FeatureType.MASK_TIMELESS,"IS_VALID"), values=1, raster_resolution=10)
+        norm = EuclideanNorm('NORM','BANDS')
+        cloud_classifier = get_s2_pixel_cloud_detector(average_over=2, dilation_size=1, all_bands=False)
 
-        workflow = LinearWorkflow(add_data,add_vector,add_lucas,add_raster,save)
+        add_clm = AddCloudMaskTask(cloud_classifier, 'BANDS-S2CLOUDLESS', cm_size_y='80m', cm_size_x='80m', 
+                           cmask_feature='CLM', # cloud mask name
+                           cprobs_feature='CLP' # cloud prob. map name
+                          )
+        add_sh_valmask = AddValidDataMaskTask(SentinelHubValidData(), 
+                                      'IS_VALID' # name of output mask
+                                     )
+        workflow = LinearWorkflow(add_data,add_clm,add_vector,add_lucas,add_raster,norm,add_sh_valmask,save)
 
         execution_args = []
         for id, wrap_bbox in enumerate(self.get_bbox_with_data().head().iterrows()):
@@ -170,8 +181,6 @@ class Reader:
                 add_vector:{'data': gdf},
                 add_data:{'bbox': BBox(bbox.geometry,crs=self.dataset.crs), 'time_interval': time_interval},
                 add_lucas:{'data': bbox.drop("geometry")},
-                
-                #add_lucas_raster:{'dataset':bbox},
                 save: {'eopatch_folder': f'eopatch_{id}'}
             })
         executor = EOExecutor(workflow, execution_args, save_logs=True)
