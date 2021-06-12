@@ -1,4 +1,4 @@
-from terrasensetk.utils.eotasks import EuclideanNorm, SentinelHubValidData
+from terrasensetk.utils.eotasks import CountValid, EuclideanNorm, SentinelHubValidData
 from ..utils import get_lucas_copernicus_path, get_time_interval, FilterVectorToRaster
 
 import sentinelhub as sh
@@ -9,7 +9,7 @@ from shapely.geometry import Polygon
 import sys
 import os
 import datetime
-
+import numpy as np
 from eolearn.io.processing_api import SentinelHubInputTask
 from sentinelhub import BBox, DataCollection
 from eolearn.core import EOTask, EOPatch, LinearWorkflow, FeatureType, OverwritePermission, \
@@ -143,25 +143,25 @@ class Reader:
             maxcc=0.8,
             time_difference=datetime.timedelta(minutes=120),
             data_collection=DataCollection.SENTINEL2_L1C,
+            additional_data=[(FeatureType.MASK, 'dataMask', 'IS_DATA'),
+                     (FeatureType.MASK, 'CLM'),
+                     (FeatureType.DATA, 'CLP')],
             max_threads=5
         )
         
         save = SaveTask(path, overwrite_permission=OverwritePermission.OVERWRITE_PATCH)
         add_vector = AddFeature((FeatureType.VECTOR_TIMELESS,"LOCATION"))
 
-        add_lucas = AddFeature((FeatureType.META_INFO,"LUCAS_DATA"))
-        add_raster = VectorToRaster((FeatureType.VECTOR_TIMELESS,"LOCATION"),(FeatureType.MASK_TIMELESS,"IS_VALID"), values=1, raster_resolution=10)
+        #add_lucas = AddFeature((FeatureType.META_INFO,"LUCAS_DATA"))
+        add_raster = VectorToRaster((FeatureType.VECTOR_TIMELESS,"LOCATION"),(FeatureType.MASK_TIMELESS,"IS_VALID"), values_column="index_right",raster_shape=(FeatureType.MASK, 'IS_DATA'),no_data_value=0,buffer=50,raster_dtype=np.uint32)
         norm = EuclideanNorm('NORM','BANDS')
-        cloud_classifier = get_s2_pixel_cloud_detector(average_over=2, dilation_size=1, all_bands=False)
 
-        add_clm = AddCloudMaskTask(cloud_classifier, 'BANDS-S2CLOUDLESS', cm_size_y='80m', cm_size_x='80m', 
-                           cmask_feature='CLM', # cloud mask name
-                           cprobs_feature='CLP' # cloud prob. map name
-                          )
         add_sh_valmask = AddValidDataMaskTask(SentinelHubValidData(), 
                                       'IS_VALID' # name of output mask
                                      )
-        workflow = LinearWorkflow(add_data,add_clm,add_vector,add_lucas,add_raster,norm,add_sh_valmask,save)
+        add_valid_count = CountValid('IS_VALID', 'VALID_COUNT')
+
+        workflow = LinearWorkflow(add_data,add_vector,add_raster,norm,add_sh_valmask,add_valid_count,save)
 
         execution_args = []
         for id, wrap_bbox in enumerate(self.get_bbox_with_data().head().iterrows()):
@@ -170,7 +170,6 @@ class Reader:
             #lucas_points_intersection = portugal_gdf[portugal_gdf.intersects(bbox)]
             #time_interval = []
             #for point in bbox.SURVEY_DATE:
-            print(bbox)
             time_interval = (get_time_interval(bbox.SURVEY_DATE,5))
             gdf = gpd.GeoDataFrame(bbox,crs=sh.CRS.WGS84.pyproj_crs())
             gdf = gdf.transpose()
@@ -180,7 +179,7 @@ class Reader:
             execution_args.append({
                 add_vector:{'data': gdf},
                 add_data:{'bbox': BBox(bbox.geometry,crs=self.dataset.crs), 'time_interval': time_interval},
-                add_lucas:{'data': bbox.drop("geometry")},
+                #add_lucas:{'data': bbox.drop("geometry")},
                 save: {'eopatch_folder': f'eopatch_{id}'}
             })
         executor = EOExecutor(workflow, execution_args, save_logs=True)
