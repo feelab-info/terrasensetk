@@ -16,6 +16,7 @@ from eolearn.core import EOTask, EOPatch, LinearWorkflow, FeatureType, Overwrite
     LoadTask, SaveTask, EOExecutor, ExtractBandsTask, MergeFeatureTask, AddFeature
 from eolearn.mask import AddCloudMaskTask, get_s2_pixel_cloud_detector, AddValidDataMaskTask
 from eolearn.geometry import VectorToRaster
+from rasterio.enums import MergeAlg
 
 #from .utils from ArgChecker
 """
@@ -47,6 +48,12 @@ class Reader:
         self._eopatch_size = eopatch_size
         self.dataset = self.dataset.to_crs(sh.CRS.WGS84.pyproj_crs())
     
+    @classmethod
+    def from_pickle(self,bbox_with_data):
+        instance = self(country="Portugal");
+        instance._bbox_with_groundtruth = bbox_with_data
+        return instance;
+
 
     def get_groundtruth(self):
         """
@@ -153,15 +160,17 @@ class Reader:
         add_vector = AddFeature((FeatureType.VECTOR_TIMELESS,"LOCATION"))
 
         #add_lucas = AddFeature((FeatureType.META_INFO,"LUCAS_DATA"))
-        add_raster = VectorToRaster((FeatureType.VECTOR_TIMELESS,"LOCATION"),(FeatureType.MASK_TIMELESS,"IS_VALID"), values_column="index_right",raster_shape=(FeatureType.MASK, 'IS_DATA'),no_data_value=0,buffer=50,raster_dtype=np.uint32)
+        #to get the surrounding data, one can apply a buffered vector to raster and set the non overlapped value some value to distinguish
+        add_raster = VectorToRaster((FeatureType.VECTOR_TIMELESS,"LOCATION"),(FeatureType.MASK_TIMELESS,"IS_VALID"), values = 1,raster_shape=(FeatureType.MASK, 'IS_DATA'),no_data_value=0,raster_dtype=np.uint8,merge_alg = MergeAlg.add, all_touched = True)
         norm = EuclideanNorm('NORM','BANDS')
 
         add_sh_valmask = AddValidDataMaskTask(SentinelHubValidData(), 
-                                      'IS_VALID' # name of output mask
+                                      'IS_VALID' # name 15of output mask
                                      )
         add_valid_count = CountValid('IS_VALID', 'VALID_COUNT')
 
-        workflow = LinearWorkflow(add_data,add_vector,add_raster,norm,add_sh_valmask,add_valid_count,save)
+        concatenate = MergeFeatureTask({FeatureType.DATA: ['BANDS']},(FeatureType.DATA, 'FEATURES'))
+        workflow = LinearWorkflow(add_data,add_vector,add_raster,norm,add_sh_valmask,add_valid_count,concatenate,save)
 
         execution_args = []
         for id, wrap_bbox in enumerate(self.get_bbox_with_data().head().iterrows()):
@@ -177,7 +186,7 @@ class Reader:
 
             gdf.set_geometry('geometry')
             execution_args.append({
-                add_vector:{'data': gdf},
+                add_vector:{'data': gdf.to_crs("EPSG:3395")},
                 add_data:{'bbox': BBox(bbox.geometry,crs=self.dataset.crs), 'time_interval': time_interval},
                 #add_lucas:{'data': bbox.drop("geometry")},
                 save: {'eopatch_folder': f'eopatch_{id}'}
