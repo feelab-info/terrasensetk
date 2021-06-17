@@ -161,7 +161,10 @@ class Reader:
 
         #add_lucas = AddFeature((FeatureType.META_INFO,"LUCAS_DATA"))
         #to get the surrounding data, one can apply a buffered vector to raster and set the non overlapped value some value to distinguish
-        add_raster = VectorToRaster((FeatureType.VECTOR_TIMELESS,"LOCATION"),(FeatureType.MASK_TIMELESS,"IS_VALID"), values = 1,raster_shape=(FeatureType.MASK, 'IS_DATA'),no_data_value=0,raster_dtype=np.uint8,merge_alg = MergeAlg.add, all_touched = True)
+        add_raster_buffer = VectorToRaster((FeatureType.VECTOR_TIMELESS,"LOCATION"),(FeatureType.MASK_TIMELESS,"IS_VALID"), values = 5,buffer=0.0005, raster_shape=(FeatureType.MASK, 'IS_DATA'),no_data_value=0,raster_dtype=np.uint8)
+        add_raster = VectorToRaster((FeatureType.VECTOR_TIMELESS,"LOCATION"),(FeatureType.MASK_TIMELESS,"IS_VALID"), values = 1,raster_shape=(FeatureType.MASK, 'IS_DATA'),write_to_existing = True,no_data_value=0,raster_dtype=np.uint8)
+        
+
         norm = EuclideanNorm('NORM','BANDS')
 
         add_sh_valmask = AddValidDataMaskTask(SentinelHubValidData(), 
@@ -170,25 +173,25 @@ class Reader:
         add_valid_count = CountValid('IS_VALID', 'VALID_COUNT')
 
         concatenate = MergeFeatureTask({FeatureType.DATA: ['BANDS']},(FeatureType.DATA, 'FEATURES'))
-        workflow = LinearWorkflow(add_data,add_vector,add_raster,norm,add_sh_valmask,add_valid_count,concatenate,save)
+        workflow = LinearWorkflow(add_data,add_vector,add_raster_buffer,add_raster,norm,add_sh_valmask,add_valid_count,concatenate,save)
 
         execution_args = []
         for id, wrap_bbox in enumerate(self.get_bbox_with_data().head().iterrows()):
             i, bbox = wrap_bbox
 
-            #lucas_points_intersection = portugal_gdf[portugal_gdf.intersects(bbox)]
+            
             #time_interval = []
             #for point in bbox.SURVEY_DATE:
             time_interval = (get_time_interval(bbox.SURVEY_DATE,5))
             gdf = gpd.GeoDataFrame(bbox,crs=sh.CRS.WGS84.pyproj_crs())
             gdf = gdf.transpose()
             gdf = gdf.rename(columns={0:'geometry'}).set_geometry('geometry')
-
             gdf.set_geometry('geometry')
+
+            lucas_points_intersection = self.get_groundtruth()[self.get_groundtruth().geometry.values.intersects(gdf.geometry.values[0])]
             execution_args.append({
-                add_vector:{'data': gdf.to_crs("EPSG:3395")},
+                add_vector:{'data': lucas_points_intersection},
                 add_data:{'bbox': BBox(bbox.geometry,crs=self.dataset.crs), 'time_interval': time_interval},
-                #add_lucas:{'data': bbox.drop("geometry")},
                 save: {'eopatch_folder': f'eopatch_{id}'}
             })
         executor = EOExecutor(workflow, execution_args, save_logs=True)
