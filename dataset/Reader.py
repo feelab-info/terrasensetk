@@ -11,13 +11,13 @@ import os
 import datetime
 import numpy as np
 from eolearn.io.processing_api import SentinelHubInputTask
-from sentinelhub import BBox, DataCollection
+from sentinelhub import BBox, DataCollection,BBoxSplitter
 from eolearn.core import EOTask, EOPatch, LinearWorkflow, FeatureType, OverwritePermission, \
     LoadTask, SaveTask, EOExecutor, ExtractBandsTask, MergeFeatureTask, AddFeature
 from eolearn.mask import AddCloudMaskTask, get_s2_pixel_cloud_detector, AddValidDataMaskTask
 from eolearn.geometry import VectorToRaster
 from rasterio.enums import MergeAlg
-
+import math
 #from .utils from ArgChecker
 """
         change location of lucas from meta_info to vector
@@ -34,15 +34,18 @@ from rasterio.enums import MergeAlg
 class Reader:
 
 
-    def __init__(self,shapefile = None,bands = None, country = None, config=None, eopatch_size = 500):
+    def __init__(self,shapefile = None,bands = None, country = None, continent = None, config=None, eopatch_size = 500):
         self._init_classvars()
         if(shapefile is not None):
             self.dataset = gpd.read_file(shapefile)
-        elif(country is not None):
-            self._world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
-            self.dataset = self._world[self._world.name==country]
         else:
-            ValueError("Either the shapefile or country must be provided")
+            self._world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
+            if(country is not None):
+                self.dataset = self._world[self._world.name==country]
+            elif(continent is not None):
+                self.dataset = self._world[self._world.continent==continent].dissolve(by="continent")
+            else:
+                ValueError("Either the shapefile or country must be provided")
 
         self._bands = bands
         self._eopatch_size = eopatch_size
@@ -96,21 +99,19 @@ class Reader:
         Returns:
             GeoDataFrame: GeoDataFrame of the dataset divided in square bbox of size of ´expected_bbox_size´.
         """
-
-        if(self._dataset_bbox is not None or reset != False):
-            return self._dataset_bbox
-
-        dataset_shape = self.dataset.to_crs("EPSG:3395").geometry.values[0]
-
-        height = dataset_shape.bounds[2] - dataset_shape.bounds[0]
-        width = dataset_shape.bounds[3] - dataset_shape.bounds[1]
         
-        bbox_num_y =  int(height/expected_bbox_size)
-        bbox_num_x =  int(width/expected_bbox_size)
 
-        dataset_bbox_splitter = sh.BBoxSplitter(self.dataset.geometry.to_list(),sh.CRS.WGS84.pyproj_crs(),(bbox_num_y,bbox_num_x))
+        dataset_shape = self.dataset.to_crs("EPSG:3395").geometry.values[-1]
 
-        geometry = [Polygon(bbox.get_polygon()) for bbox in dataset_bbox_splitter.get_bbox_list()]
+        width = math.ceil(dataset_shape.bounds[2] - dataset_shape.bounds[0])
+        height = math.ceil(dataset_shape.bounds[3] - dataset_shape.bounds[1])
+        bbox_num_y =  math.ceil(height/expected_bbox_size)
+        bbox_num_x =  math.ceil(width/expected_bbox_size)
+        print(f"bbox_y: {bbox_num_y} bbox_xa:{bbox_num_x}")
+        print(f"width: {width} height: {height}")
+        self.dataset_bbox_splitter = sh.BBoxSplitter(self.dataset.geometry.to_list(),sh.CRS.WGS84.pyproj_crs(),(bbox_num_x,bbox_num_y))
+        #test
+        geometry = [Polygon(bbox.get_polygon()) for bbox in self.dataset_bbox_splitter.get_bbox_list()]
         self._dataset_bbox = gpd.GeoDataFrame(crs=sh.CRS.WGS84.pyproj_crs(), geometry=geometry)
         return self._dataset_bbox
     
@@ -147,6 +148,7 @@ class Reader:
         add_data = SentinelHubInputTask(
             bands_feature=(FeatureType.DATA, 'BANDS'),
             resolution=10,
+#            bands=['B02','B03','B04','B08'],
             maxcc=0.8,
             time_difference=datetime.timedelta(minutes=120),
             data_collection=DataCollection.SENTINEL2_L1C,
@@ -176,7 +178,7 @@ class Reader:
         workflow = LinearWorkflow(add_data,add_vector,add_raster_buffer,add_raster,norm,add_sh_valmask,add_valid_count,concatenate,save)
 
         execution_args = []
-        for id, wrap_bbox in enumerate(self.get_bbox_with_data().head().iterrows()):
+        for id, wrap_bbox in enumerate(self.get_bbox_with_data().iterrows()):
             i, bbox = wrap_bbox
 
             
