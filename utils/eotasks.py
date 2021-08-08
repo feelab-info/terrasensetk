@@ -1,4 +1,5 @@
 from eolearn.core import EOTask,FeatureType
+from eolearn.features import LinearInterpolation
 import numpy as np
 
 
@@ -64,3 +65,17 @@ class EuclideanNorm(EOTask):
         
         eopatch.add_feature(FeatureType.DATA, self.feature_name, norm[..., np.newaxis])
         return eopatch
+
+class InterpolationTask(EOTask):
+    
+    def execute(self,eopatch):
+        
+        start = eopatch.timestamp[0].strftime("%Y-%m-%d")
+        end = eopatch.timestamp[-1].strftime("%Y-%m-%d")
+        resampled_range = (start, end, 4)
+        linear_interp = LinearInterpolation(
+            'FEATURES', # name of field to interpolate
+            mask_feature=(FeatureType.MASK_TIMELESS, 'IS_VALID'), # mask to be used in interpolation
+            copy_features=[(FeatureType.DATA, 'NORM'),(FeatureType.MASK, 'IS_DATA'),(FeatureType.MASK, 'IS_VALID'),(FeatureType.MASK_TIMELESS, 'IS_VALID'),(FeatureType.VECTOR_TIMELESS,"LOCATION")], # features to keep            resample_range=resampled_range,
+        )
+        return linear_interp.execute(eopatch)
