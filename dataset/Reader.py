@@ -6,6 +6,7 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 import pandas as pd
 from shapely.geometry import Polygon
+import shapely
 import sys
 import os
 import datetime
@@ -109,7 +110,8 @@ class Reader:
         bbox_num_x =  math.ceil(width/expected_bbox_size)
         print(f"bbox_y: {bbox_num_y} bbox_xa:{bbox_num_x}")
         print(f"width: {width} height: {height}")
-        self.dataset_bbox_splitter = sh.BBoxSplitter(self.dataset.geometry.to_list(),sh.CRS.WGS84.pyproj_crs(),(bbox_num_x,bbox_num_y))
+        #self.dataset_bbox_splitter = sh.BBoxSplitter(self.dataset.geometry.to_list(),sh.CRS.WGS84.pyproj_crs(),(bbox_num_x,bbox_num_y))
+        self.dataset_bbox_splitter = sh.BBoxSplitter([shapely.geometry.MultiPolygon([i.buffer(0.0005) for i in self.get_groundtruth().geometry.values])],sh.CRS.WGS84.pyproj_crs(),(bbox_num_x,bbox_num_y),reduce_bbox_sizes = True)
         #test
         geometry = [Polygon(bbox.get_polygon()) for bbox in self.dataset_bbox_splitter.get_bbox_list()]
         self._dataset_bbox = gpd.GeoDataFrame(crs=sh.CRS.WGS84.pyproj_crs(), geometry=geometry)
@@ -178,7 +180,7 @@ class Reader:
         workflow = LinearWorkflow(add_data,add_vector,add_raster_buffer,add_raster,norm,add_sh_valmask,add_valid_count,concatenate,save)
 
         execution_args = []
-        for id, wrap_bbox in enumerate(self.get_bbox_with_data().iterrows()):
+        for id, wrap_bbox in enumerate(self.get_bbox_with_data()[:10].iterrows()):
             i, bbox = wrap_bbox
 
             
