@@ -1,5 +1,7 @@
+from sentinelhub.areas import CustomGridSplitter
 from terrasensetk.utils.eotasks import CountValid, EuclideanNorm, SentinelHubValidData
-from ..utils import get_lucas_copernicus_path, get_time_interval, FilterVectorToRaster
+from ..utils import get_lucas_copernicus_path, get_time_interval, FilterVectorToRaster,to_square
+import itertools
 
 import sentinelhub as sh
 import geopandas as gpd
@@ -11,13 +13,15 @@ import os
 import datetime
 import numpy as np
 from eolearn.io.processing_api import SentinelHubInputTask
-from sentinelhub import BBox, DataCollection,BBoxSplitter
+from sentinelhub import BBox, DataCollection,BBoxSplitter,CustomGridSplitter,BBoxCollection
 from eolearn.core import EOTask, EOPatch, LinearWorkflow, FeatureType, OverwritePermission, \
     LoadTask, SaveTask, EOExecutor, ExtractBandsTask, MergeFeatureTask, AddFeature
 from eolearn.mask import AddCloudMaskTask, get_s2_pixel_cloud_detector, AddValidDataMaskTask
 from eolearn.geometry import VectorToRaster
 from rasterio.enums import MergeAlg
 import math
+import shapely
+import compress_pickle as cpickle
 #from .utils from ArgChecker
 """
         change location of lucas from meta_info to vector
@@ -50,12 +54,24 @@ class Downloader:
         self._bands = bands
         self._eopatch_size = eopatch_size
         self.dataset = self.dataset.to_crs(sh.CRS.WGS84.pyproj_crs())
-    
+
+    """Loads the pickled Downloader object
+
+    Returns:
+        Downloader: An instance that was saved in the pickle file
+    """
     @classmethod
-    def from_pickle(self,bbox_with_data):
-        instance = self(country="Portugal");
-        instance._bbox_with_groundtruth = bbox_with_data
-        return instance;
+    def from_pickle(self,file):
+        with open(file,'rb') as f:
+            instance = cpickle.load(f,compression="bz2")
+            return instance
+
+
+        """ Pickles the current Downloader object that can be loaded by the ´from_pickle´ function
+        """
+    def to_pickle(self,file):
+        with open(file,'wb') as f:
+            cpickle.dump(self,f,compression="bz2")
 
 
     def get_groundtruth(self):
@@ -109,8 +125,11 @@ class Downloader:
         bbox_num_x =  math.ceil(width/expected_bbox_size)
         print(f"bbox_y: {bbox_num_y} bbox_xa:{bbox_num_x}")
         print(f"width: {width} height: {height}")
-        self.dataset_bbox_splitter = sh.BBoxSplitter(self.dataset.geometry.to_list(),sh.CRS.WGS84.pyproj_crs(),(bbox_num_x,bbox_num_y))
-        #test
+        
+        #create bboxes around the groundtruth
+        self.dataset_bbox_splitter = CustomGridSplitter([shapely.geometry.MultiPolygon([i.buffer(0.0005) for i in self.get_groundtruth().geometry.values])],
+            sh.CRS.WGS84.pyproj_crs(),
+            BBoxCollection(self.get_groundtruth().geometry.apply(to_square).apply(lambda x: BBox(x,sh.CRS.WGS84)).to_list()))
         geometry = [Polygon(bbox.get_polygon()) for bbox in self.dataset_bbox_splitter.get_bbox_list()]
         self._dataset_bbox = gpd.GeoDataFrame(crs=sh.CRS.WGS84.pyproj_crs(), geometry=geometry)
         return self._dataset_bbox
@@ -140,8 +159,12 @@ class Downloader:
         self._dataset_bbox = None
         self._bbox_with_groundtruth = None
         self._ground_truth = None        
-    
-    def download_images(self,path):
+    """
+        Subset should be a Reader.get_bbox_with_data() slice
+    """
+    def download_images(self,path,subset=None):
+        if subset is None:
+            subset = self.get_bbox_with_data()
         if not os.path.isdir(path):
             os.makedirs(path)
 
@@ -178,7 +201,7 @@ class Downloader:
         workflow = LinearWorkflow(add_data,add_vector,add_raster_buffer,add_raster,norm,add_sh_valmask,add_valid_count,concatenate,save)
 
         execution_args = []
-        for id, wrap_bbox in enumerate(self.get_bbox_with_data().iterrows()):
+        for id, wrap_bbox in enumerate(subset.iterrows()):
             i, bbox = wrap_bbox
 
             
@@ -200,4 +223,3 @@ class Downloader:
         executor.run(workers=5, multiprocess=False)
 
         executor.make_report()
-
