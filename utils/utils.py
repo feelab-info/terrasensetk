@@ -46,7 +46,21 @@ def parse_table_to_dict(html_table):
     for row in rows:
         values = [col.text for col in row]
         print (zip(headers, values))
+        
+from shapely.geometry import Point
+from math import sqrt
 
+def to_square(polygon):
+    pol = polygon.buffer(0.0005)
+    
+    minx, miny, maxx, maxy = pol.bounds
+    
+    # get the centroid
+    centroid = [(maxx+minx)/2, (maxy+miny)/2]
+    # get the diagonal
+    diagonal = sqrt((maxx-minx)**2+(maxy-miny)**2)
+    
+    return Point(centroid).buffer(diagonal/2, cap_style=3)
 #target third td from the table with class matrix
 #get_indexes_from_bands()
 
@@ -67,3 +81,4 @@ def parse_table_to_dict(html_table):
          #print(str(table))
 #print(str(html_page.read())[:200])
 #parse_table_to_dict(str(html_page.read()))
+
