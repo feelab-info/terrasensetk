@@ -127,7 +127,7 @@ class Downloader:
         print(f"width: {width} height: {height}")
         
         #create bboxes around the groundtruth
-        self.dataset_bbox_splitter = CustomGridSplitter([shapely.geometry.MultiPolygon([i.buffer(0.0005) for i in self.get_groundtruth().geometry.values])],
+        self.dataset_bbox_splitter = CustomGridSplitter([shapely.geometry.MultiPolygon([i.buffer(0.002) for i in self.get_groundtruth().geometry.values])],
             sh.CRS.WGS84.pyproj_crs(),
             BBoxCollection(self.get_groundtruth().geometry.apply(to_square).apply(lambda x: BBox(x,sh.CRS.WGS84)).to_list()))
         geometry = [Polygon(bbox.get_polygon()) for bbox in self.dataset_bbox_splitter.get_bbox_list()]
