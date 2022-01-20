@@ -11,11 +11,10 @@ class TSPatch(EOPatch):
         mask_filtered = np.where(mask==5,0,mask)
         return mask_filtered
 
-    def get_values_of_masked_region(self ,indices ,band_names ,as_array=True):
+    def get_values_of_masked_region(self ,indices = None ,band_names = None,as_array=True):
         """Returns the pixels in the masked region for the selected indices and band_names for each of the 
 
         Args:
-            eopatch_index (int): the index of the eopatch
             indices ([type]): [description]
             band_names ([type]): [description]
             as_array (bool, optional): [description]. Defaults to True.
@@ -55,13 +54,13 @@ class TSPatch(EOPatch):
         return image
 
 
-    def get_dataset_entry_value(self,nutrient, is_pixelized = True):
+    def get_dataset_entry_value(self,nutrient, is_pixelized = False):
         """[summary]
 
         Args:
             index (int): [description]
             nutrient (string): Entry of the table (N,P,K)
-            is_pixelized (bool, optional): If true returns the value in the shape of the mask, if not, returns a scalar(int). Defaults to True.
+            is_pixelized (bool, optional): If true returns the value in the shape of the mask, if not, returns a scalar(int). Defaults to False.
 
         Returns:
             [type]: [description]

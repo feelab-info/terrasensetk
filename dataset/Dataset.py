@@ -38,8 +38,9 @@ class Dataset:
         executor.run(workers=5, multiprocess=False)
     
     def get_eopatches_dataframe(self):
+    
         """Returns the DATASET information
-
+                
         Returns:
             DataFrame: 
         """

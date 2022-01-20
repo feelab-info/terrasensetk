@@ -1,2 +1,3 @@
-from . import Reader
+from . import Dataset
+from . import TSPatch
 from . import Downloader
