@@ -11,8 +11,13 @@ class Parser:
             
             raise TypeError("Must be a subtype of terrasensetk.Dataset")
         self.subset = subset
-        self.dataset
+        self.dataset = dataset
     
+    def get_dataset(self):
+        return self.dataset
+
+    dataset = property(get_dataset,None,None,"""The dataset that was parsed""")
+
     def create_dataframe(self,subset, indices=None, bands=None):
         """Creates the dataframe ready for the algorithm processing
 
