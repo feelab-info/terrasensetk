@@ -9,7 +9,7 @@ class SequentialFeatureSelector(IFeatureSelection):
         self.number_of_features = number_of_features
 
     def fit(self,*kwargs):
-        return self.model.fit(*kwargs)
+        return self.model.fit_transform(*kwargs[0],*kwargs[1])
 
     def predict(self,*kwargs):
         return self.model.predict(*kwargs)

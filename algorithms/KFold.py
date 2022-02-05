@@ -1,6 +1,6 @@
-from IFeatureSelection import IFeatureSelection
+from ICrossValidation import ICrossValidation
 from sklearn.model_selection import KFold as sklKFold
-class KFold(IFeatureSelection):
+class KFold(ICrossValidation):
 
     def __init__(self,*args):
         self.model = sklKFold(*args)
