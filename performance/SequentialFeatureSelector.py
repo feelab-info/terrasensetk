@@ -1,5 +1,5 @@
 from numpy import number
-from IFeatureSelection import IFeatureSelection
+from .IFeatureSelection import IFeatureSelection
 from sklearn.feature_selection import SelectKBest,f_regression, SequentialFeatureSelector
 from sklearn.ensemble import GradientBoostingRegressor
 class SequentialFeatureSelector(IFeatureSelection):

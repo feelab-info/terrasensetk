@@ -1,6 +1,7 @@
 from sentinelhub.areas import CustomGridSplitter
-from terrasensetk.utils.eotasks import CountValid, EuclideanNorm, SentinelHubValidData
-from ..utils import get_lucas_copernicus_path, get_time_interval, FilterVectorToRaster,to_square
+from ..utils.eotasks import CountValid, EuclideanNorm, SentinelHubValidData
+from ..utils.utils import get_lucas_copernicus_path, get_time_interval,to_square
+from ..utils.filtervectortoraster import FilterVectorToRaster
 import itertools
 
 import sentinelhub as sh

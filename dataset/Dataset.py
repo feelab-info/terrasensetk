@@ -4,7 +4,7 @@ import numpy as np
 from eolearn.core import EOTask, EOPatch, LinearWorkflow, FeatureType, OverwritePermission, LoadFromDisk, SaveToDisk,SaveTask, LoadTask
 from eolearn.core.eoexecution import EOExecutor
 
-from dataset.TSPatch import TSPatch
+from .TSPatch import TSPatch
 from ..utils import AddIndicesTask
 class Dataset:
     def __init__(self, eopatches_folder):

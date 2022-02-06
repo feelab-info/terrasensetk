@@ -1,2 +1,2 @@
-from IAlgorithm import IAlgorithm
-from SupportVectorRegression import SupportVectorRegression
+from . import IAlgorithm
+from . import SupportVectorRegression
