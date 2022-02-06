@@ -2,11 +2,15 @@ import abc
 class IAlgorithm(abc.ABC):
 
 
-    @abc.abstractclassmethod
+    @abc.abstractmethod
     def fit(*kwargs):
         pass
 
 
-    @abc.abstractclassmethod
+    @abc.abstractmethod
     def predict(*kwargs):
+        pass
+
+    @abc.abstractclassmethod
+    def clone(cls):
         pass

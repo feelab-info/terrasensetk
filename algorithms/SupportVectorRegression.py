@@ -1,6 +1,6 @@
 from sklearn.svm import SVR
-from algorithms.IAlgorithm import IAlgorithm
-
+from .IAlgorithm import IAlgorithm
+from sklearn.base import clone
 class SupportVectorRegression(IAlgorithm):
 
     def __init__(self,*args,**kargs):
@@ -16,3 +16,7 @@ class SupportVectorRegression(IAlgorithm):
 
     def get_model(self):
         return self.model
+    
+    @classmethod
+    def clone(cls,model):
+        return clone(model)
