@@ -21,6 +21,8 @@ class Results:
         return self.model
     def _get_features(self):
         return self.features
+    def _get_y_pred(self):
+        return self.model.predict(self.x_test)
         
     x_test = property(_get_x_test,None,None,"Gets the x_test")
     y_test = property(_get_y_test,None,None,"Gets the y_test")
@@ -28,4 +30,5 @@ class Results:
     y_train = property(_get_y_train,None,None,"Gets the y_train")
     model = property(_get_model,None,None,"Gets the model")
     features = property(_get_features,None,None,"Gets the features")
+    y_pred = property(_get_y_pred,None,None,"Get the corresponding prediction for x_test")
     
