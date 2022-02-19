@@ -39,7 +39,7 @@ import compress_pickle as cpickle
 class Downloader:
 
 
-    def __init__(self,shapefile = None,bands = None, country = None, continent = None, config=None, eopatch_size = 500):
+    def __init__(self,shapefile = None,bands = None, country = None, continent = None, config=None):
         self._init_classvars()
         if(shapefile is not None):
             self.dataset = gpd.read_file(shapefile)
@@ -53,7 +53,7 @@ class Downloader:
                 ValueError("Either the shapefile or country must be provided")
 
         self._bands = bands
-        self._eopatch_size = eopatch_size
+        #self._eopatch_size = eopatch_size
         self.dataset = self.dataset.to_crs(sh.CRS.WGS84.pyproj_crs())
 
     """Loads the pickled Downloader object
