@@ -56,10 +56,11 @@ class Experiment:
 
 
     def calculate_metrics(self,metrics,list_of_metrics=['rmse']):
+        if(self.results is None): raise TypeError("Execute method was not called yet.")
         if not issubclass(metrics,MetricsBase):
             raise TypeError("Metrics is not a subtype of MetricsBase")
-        else:
-            metrics.check_metrics(self.results,list_of_metrics)
+    
+        return metrics.check_metrics(self.results,list_of_metrics)
 
 
     #impl
