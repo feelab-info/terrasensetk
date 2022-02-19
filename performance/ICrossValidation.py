@@ -1,7 +1,6 @@
 
 import abc
 
-
 class ICrossValidation(abc.ABC):
 
     @abc.abstractclassmethod

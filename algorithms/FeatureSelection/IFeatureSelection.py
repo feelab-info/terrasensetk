@@ -2,7 +2,7 @@ import abc
 
 from numpy import number
 
-from ..algorithms.IAlgorithm import IAlgorithm
+from ..IAlgorithm import IAlgorithm
 class IFeatureSelection(IAlgorithm):
 
 

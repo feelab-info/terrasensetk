@@ -1,13 +1,13 @@
 
 from utils.Results import Results
 from ..algorithms.IAlgorithm import IAlgorithm
-from ..performance.IFeatureSelection import IFeatureSelection
-from ..algorithms.ICrossValidation import ICrossValidation
+from ..algorithms.FeatureSelection.IFeatureSelection import IFeatureSelection
+from ..performance.ICrossValidation import ICrossValidation
 from ..dataset.Dataset import Dataset
 from ..parser.Parser import Parser
 from sklearn.model_selection import train_test_split
 class Experiment:
-    def __init__(self, dataset_parser,model, feature_selection=None, cross_validation=None,fit_for_variable="N"):
+    def __init__(self, dataset_parser,model, feature_selection=None, cross_validation=None,fit_for_variable="N",train_test_split=60):
         if(not issubclass(Parser,dataset_parser)): raise TypeError("Not a subtype of Parser")
         if(not issubclass(IFeatureSelection,feature_selection) or not feature_selection is None): raise TypeError("Not a subtype of IFeatureSelection")
         if(not issubclass(IAlgorithm,model)): raise TypeError("Not a subtype of IAlgorithm")
@@ -21,6 +21,7 @@ class Experiment:
         self.eopatch_ids = self.eopatch_ids.unique()
         self.dataset_array = self.dataset_parser.create_array(fit_for_variable);
         self.fit_for_variable = fit_for_variable
+        self.train_test_split=train_test_split
 
 
     def execute(self) -> list(Results):
@@ -48,7 +49,7 @@ class Experiment:
             model.fit(x_train,y_train)
             model.predict(x_test)
             results.append(Results(x_train,y_test,x_train,y_train,model))
-        return results       
+        return results
 
 
 

@@ -1,2 +1,2 @@
-from .IFeatureSelection import IFeatureSelection
-from .SequentialFeatureSelector import SequentialFeatureSelector
+from .ICrossValidation import ICrossValidation
+from .KFold import KFold

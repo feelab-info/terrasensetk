@@ -1,5 +1,5 @@
 from sklearn.svm import SVR
-from .IAlgorithm import IAlgorithm
+from ..IAlgorithm import IAlgorithm
 from sklearn.base import clone
 class SupportVectorRegression(IAlgorithm):
 
