@@ -25,7 +25,7 @@ class Results:
         return self.model.predict(self.x_test)
         
     x_test = property(_get_x_test,None,None,"Gets the x_test")
-    y_test = property(_get_y_test,None,None,"Gets the y_test")
+    y_test = property(_get_y_test,None,None,"Gets the y_test aka groundtruth")
     x_train = property(_get_x_train,None,None,"Gets the x_train")
     y_train = property(_get_y_train,None,None,"Gets the y_train")
     model = property(_get_model,None,None,"Gets the model")
