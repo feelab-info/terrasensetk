@@ -1,4 +1,5 @@
 
+from performance.metrics.MetricsBase import MetricsBase
 from utils.Results import Results
 from ..algorithms.IAlgorithm import IAlgorithm
 from ..algorithms.FeatureSelection.IFeatureSelection import IFeatureSelection
@@ -49,11 +50,18 @@ class Experiment:
             model.fit(x_train,y_train)
             model.predict(x_test)
             results.append(Results(x_train,y_test,x_train,y_train,model))
-        return results
+        self.results = results
+        return self.results
 
 
 
-    
+    def calculate_metrics(self,metrics,list_of_metrics=['rmse']):
+        if not issubclass(metrics,MetricsBase):
+            raise TypeError("Metrics is not a subtype of MetricsBase")
+        else:
+            metrics.check_metrics(self.results,list_of_metrics)
+
+
     #impl
     """ modelo = SelectKBest(args)
     dataset = Dataset()
