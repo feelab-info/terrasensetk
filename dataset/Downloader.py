@@ -75,16 +75,46 @@ class Downloader:
             cpickle.dump(self,f,compression="bz2")
 
 
-    def get_groundtruth(self):
+    def get_groundtruth(self,crop = None):
+        
         """
-
+        Args:
+            crop: which crop to filter by possible values: 
+                ['Grassland without tree/shrub cover',
+                'Shrubland without tree cover', 'Peatbogs', 'Inland marshes',
+                'Spontaneously vegetated surfaces', 'Rape and turnip rape',
+                'Barley', 'Spruce dominated mixed woodland',
+                'Grassland with sparse tree/shrub cover', 'Broadleaved woodland',
+                'Temporary grasslands', 'Spruce dominated coniferous woodland',
+                'Oats', 'Clovers', 'Sunflower',
+                'Pine dominated coniferous woodland', 'Other mixed woodland',
+                'Common wheat', 'Other coniferous woodland',
+                'Pine dominated mixed woodland',
+                'Shrubland with sparse tree cover', 'Sugar beet', 'Lucerne', 'Rye',
+                'Potatoes', 'Maize', 'Triticale',
+                'Other fibre and oleaginous crops', 'Other root crops',
+                'Apple fruit', 'Mixed cereals for fodder',
+                'Other artificial areas', 'Durum wheat', 'Dry pulses', 'Vineyards',
+                'Other bare soil', 'Olive groves', 'Nurseries', 'Oranges',
+                'Tomatoes', 'Other leguminous and mixtures for fodder', 'Soya',
+                'Other fruit trees and berries', 'Inland fresh running water',
+                'Nuts trees', 'Pear fruit', 'Other non-permanent industrial crops',
+                'Permanent industrial crops', 'Non built-up linear features',
+                'Sand', 'Cotton', 'Cherry fruit', 'Other fresh vegetables',
+                'Non built-up area features', 'Lichens and moss',
+                'Rocks and stones', 'Other cereals', 'Strawberries',
+                'Floriculture and ornamental plants', 'Other citrus fruit', 'Rice',
+                'Buildings with 1 to 3 floors', 'Tobacco']
         Returns:
             GeoDataFrame: Contains the groundtruth data within the given region
         """
         if self._groundtruth_points is not None:
             return self._groundtruth_points
-
         groundtruth_gdf = pd.read_pickle(get_lucas_copernicus_path(),compression='bz2')
+        
+        if crop is not None:
+            groundtruth_gdf = groundtruth_gdf[groundtruth_gdf.LC1_LABEL == crop]
+        
         self._groundtruth_points = gpd.sjoin(groundtruth_gdf,self.dataset,op="within",how="inner").drop("index_right", axis="columns")
         return self._groundtruth_points
 
