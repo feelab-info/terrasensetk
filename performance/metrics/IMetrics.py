@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-class MetricsBase:
+class IMetrics:
     """
         Base class for metric calculation
         Based on the work present in: https://github.com/ECGomes/nilm_metrics/blob/master/metrics/metrics_base.py

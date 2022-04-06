@@ -1,5 +1,5 @@
 
-from performance.metrics.MetricsBase import MetricsBase
+from performance.metrics.IMetrics import IMetrics
 from sklearn import metrics
 import pandas as pd
 import numpy as np
@@ -7,7 +7,7 @@ import sklearn
 from metric_utils import aux_error_checking
 import math
 
-class RegressionMetrics(MetricsBase):
+class RegressionMetrics(IMetrics):
 
     def cmd_rmse(self,gt,pred):
         """
