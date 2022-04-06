@@ -1,1 +1,1 @@
-from SupportVectorRegression import SupportVectorRegression
+from .SupportVectorRegression import SupportVectorRegression

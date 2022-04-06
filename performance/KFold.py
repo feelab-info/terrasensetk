@@ -1,4 +1,4 @@
-from ICrossValidation import ICrossValidation
+from .ICrossValidation import ICrossValidation
 from sklearn.model_selection import KFold as sklKFold
 class KFold(ICrossValidation):
 
