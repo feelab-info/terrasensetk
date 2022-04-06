@@ -80,27 +80,26 @@ class InterpolationTask(EOTask):
         )
         return linear_interp.execute(eopatch)
 
+def band(band_id,bands):
+    t,w,h,_ = bands.shape
+    return bands[...,band_id].reshape(t,w,h,1) 
+
 class AddIndicesTask(EOTask):
+    def __init__(self, index_dic,available_bands):
+        self.index_dic = index_dic
+        self.available_bands = available_bands
+
     def execute(self, eopatch):
         indices = ["RVI","NDVI74","IRECI","GM","GNDVI","RECHI","REPLI","S2REP","SRRE","NDVI_NB"]
 
         bands = eopatch.data["BANDS"]
-        def band(band_id):
-            t,w,h,_ = bands.shape
-            return bands[...,band_id+1].reshape(t,w,h,1) 
-        #band = lambda band_id: bands[...,band_id+1] 
-        eopatch.data["NDVI74"] = (band(7) - band(4)) / (band(7) + band(4))
-        eopatch.data["IRECI"] = (band(7) - band(4)) / (band(5) + band(6))
-        eopatch.data["REM"] = (band(7) / band(5)) - 1
-        eopatch.data["GM"] = (band(7) / band(3)) - 1
-        rre = (band(7) + band(4)) / 2
-        eopatch.data["REPLI"] = 700 + 40 * (rre - band(5)) / (band(6) - band(5))
-        eopatch.data["RECHI"] = (band(6) - band(5))/band(5)
-        eopatch.data["S2REP"] = 705 + 35 * ((rre - band(5)) / (band(6) - band(5)))
-        eopatch.data["GNDVI"] = (band(8) - band(3)) / (band(8) + band(3))
-        eopatch.data["SRRE"] = (band(5)) / (band(10))
-        eopatch.data["NDVI_NB"] = (band(9)- band(4))/(band(9) + band(4))
-        eopatch.data["RVI"] = (band(8) / band(4))
-        for index in indices:
-            np.nan_to_num(eopatch.data[index],False,nan=0,posinf=0,neginf=0)
+        for key,value in self.index_dic:
+
+            new_index = value
+            for band in self.available_bands:
+                if band in new_index:
+                    new_index = new_index.replace(band,f"bands({self.available_bands.index(band)})")
+
+            eopatch.data[key] = eval(new_index)
+            np.nan_to_num(eopatch.data[key],copy=False,nan=0,posinf=0,neginf=0)
         return eopatch        
