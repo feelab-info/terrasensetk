@@ -10,9 +10,11 @@ class Dataset:
     def __init__(self, eopatches_folder):
         self.eopatches_folder = eopatches_folder
         self._eopatches = []
-        self.index_dic = {}
+        
         for path in os.listdir(eopatches_folder):
             self._eopatches.append(TSPatch.load(os.path.join(eopatches_folder,path),lazy_loading=True))
+        #self.index_dic = self._eopatches[0].data
+        self.index_dic = {}
 
     def get_eopatches(self):
         return self._eopatches
@@ -63,10 +65,13 @@ class Dataset:
             execution_args.append(
             {
                 load: {'eopatch_folder': f'eopatch_{i}'},
+                add_indices: {},
                 save: {'eopatch_folder': f'eopatch_{i}'}
             })
         executor = EOExecutor(workflow, execution_args, save_logs=True)
         executor.run(workers=5, multiprocess=False)
+        executor.make_report()
+
     
     def get_eopatches_dataframe(self):
     

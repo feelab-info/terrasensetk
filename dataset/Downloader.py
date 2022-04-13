@@ -154,8 +154,8 @@ class Downloader:
         height = math.ceil(dataset_shape.bounds[3] - dataset_shape.bounds[1])
         bbox_num_y =  math.ceil(height/expected_bbox_size)
         bbox_num_x =  math.ceil(width/expected_bbox_size)
-        print(f"bbox_y: {bbox_num_y} bbox_xa:{bbox_num_x}")
-        print(f"width: {width} height: {height}")
+        # print(f"bbox_y: {bbox_num_y} bbox_xa:{bbox_num_x}")
+        # print(f"width: {width} height: {height}")
         
         #create bboxes around the groundtruth
         self.dataset_bbox_splitter = CustomGridSplitter([shapely.geometry.MultiPolygon([i.buffer(0.002) for i in self.get_groundtruth().geometry.values])],
