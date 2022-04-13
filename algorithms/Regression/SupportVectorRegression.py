@@ -17,6 +17,5 @@ class SupportVectorRegression(IAlgorithm):
     def get_model(self):
         return self.model
     
-    @classmethod
-    def clone(cls,model):
-        return clone(model)
+    def clone(self):
+        return clone(self.model)

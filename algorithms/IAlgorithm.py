@@ -11,6 +11,6 @@ class IAlgorithm(abc.ABC):
     def predict(*kwargs):
         pass
 
-    @abc.abstractclassmethod
+    @abc.abstractmethod
     def clone(cls):
         pass

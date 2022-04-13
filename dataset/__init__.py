@@ -1,3 +1,3 @@
-from . import Dataset
-from . import TSPatch
-from . import Downloader
+from .Dataset import Dataset
+from .TSPatch import TSPatch
+from .Downloader import Downloader

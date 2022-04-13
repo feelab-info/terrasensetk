@@ -1,29 +1,31 @@
 from shutil import ExecError
 import pandas as pd
 from typing import Type
-from . import Dataset
-from .parser import IParser
-INDICES = ["RVI","NDVI74","IRECI","GM","GNDVI","RECHI","REPLI","S2REP","SRRE","NDVI_NB"]
-BANDS = ["1","2","3","4","5","6","7","8", "8-A","9","10","11","12"]
+from .. import Dataset
+from .IParser import IParser
+#INDICES = ["RVI","NDVI74","IRECI","GM","GNDVI","RECHI","REPLI","S2REP","SRRE","NDVI_NB"]
+INDICES =["NDVI74","IRECI","REM","GM","REPLI","RECHI","S2REP","NDI45","GNDVI","NDVINB","RVI"],
+BANDS = ["B01","B02","B03","B04","B05","B06","B07","B08", "B8A","B09","B10","B11","B12"]
 class Parser(IParser):
     
-    def __init__(self,dataset,subset):
+    def __init__(self,dataset,subset = None):
         if( not isinstance(dataset,Dataset)):
             raise TypeError("Must be a subtype of terrasensetk.Dataset")
-            
+        if subset is None:
+            self.subset = dataset.get_eopatches()
         self.indices = INDICES
         self.bands = BANDS
-        self.subset = subset
-        self.dataset = dataset
+        self._dataset = dataset
+        self.save_dataframe = None
     
     def _get_dataset(self):
-        return self.dataset
+        return self._dataset
     def _get_features(self):
         return self.indices+self.bands
         
     dataset = property(_get_dataset,None,None,"""The dataset that was parsed""")
     features = property(_get_features,None,None,"""The features that exist in this array""")
-    def create_dataframe(self,subset, indices=None, bands=None, dataset_extra_data=["N","P","K"],image_identifier="Point_ID"):
+    def create_dataframe(self,subset=None, indices=None, bands=None, dataset_extra_data=["N","P","K"],image_identifier="Point_ID"):
         """Creates the dataframe ready for the algorithm processing
 
         Args:
@@ -36,29 +38,37 @@ class Parser(IParser):
         Returns:
             [type]: [description]
         """
+        if not isinstance(subset, list) and subset is not None: raise TypeError("Subset must be a list of EOPatches")
+        tmp_indices = INDICES[-1]
         if indices == None:
-            indices = INDICES+dataset_extra_data+[image_identifier]
+            indices = tmp_indices#+dataset_extra_data+[image_identifier]
+
         if bands == None:
             bands = BANDS
+
+        if subset is not None:
+            self.subset = subset
+        
         self.indices = indices
         self.bands = bands
         self.dataset_extra_data = dataset_extra_data
         self.image_identifier = image_identifier
-        if(self.save_dataframe != None):
+        
+        if self.save_dataframe is not None:
             return self.save_dataframe
-        self.subset = subset
-        all_features = indices+bands
-        save_dataframe = pd.DataFrame(columns=indices+bands) 
-        self.imagery = indices+len(dataset_extra_data)+1 #dataset_extra_data+image_identifier
+        
+        # all_features = indices+bands
+        save_dataframe = pd.DataFrame(columns=indices+bands+dataset_extra_data+[image_identifier]) 
+        # self.imagery = indices+len(dataset_extra_data)+1 #dataset_extra_data+image_identifier
         
         #for i,eopatch in enumerate(self.dataset.get_eopatches()[eopatches_indices]):
-        for i,eopatch in enumerate(subset):
+        for i,eopatch in enumerate(self.subset):
             mask = eopatch.get_masked_region()
             values = eopatch.get_values_of_masked_region(indices,bands)
             for extra_variable in dataset_extra_data:
                 values[extra_variable] = eopatch.get_dataset_entry_value(extra_variable,is_pixelized=True)
             
-            values["image_identifier"] = eopatch.get_dataset_entry_value(image_identifier,is_pixelized=True)
+            values[image_identifier] = eopatch.get_dataset_entry_value(image_identifier,is_pixelized=True)
             values = pd.DataFrame(values)
             save_dataframe = save_dataframe.append(values, ignore_index=True)
 
