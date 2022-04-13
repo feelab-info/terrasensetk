@@ -4,21 +4,22 @@ from ..utils.Results import Results
 from ..algorithms.IAlgorithm import IAlgorithm
 from ..algorithms.FeatureSelection.IFeatureSelection import IFeatureSelection
 from ..performance.ICrossValidation import ICrossValidation
-from ..dataset.Dataset import Dataset
-from ..dataset.parser.IParser import IParser
+from ..dataset import Dataset
+from ..dataset.parser import IParser
 from sklearn.model_selection import train_test_split
 class Experiment:
     def __init__(self, dataset_parser,model, feature_selection=None, cross_validation=None,fit_for_variable="N",train_test_split=60):
-        if(not issubclass(IParser,dataset_parser)): raise TypeError("Not a subtype of IParser")
-        if(not issubclass(IFeatureSelection,feature_selection) or not feature_selection is None): raise TypeError("Not a subtype of IFeatureSelection")
-        if(not issubclass(IAlgorithm,model)): raise TypeError("Not a subtype of IAlgorithm")
-        if(not issubclass(ICrossValidation,model) or not cross_validation is None): raise TypeError("Not a subtype of ICrossValidation")
+        
+        if(not issubclass(type(dataset_parser),IParser)): raise TypeError("Not a subtype of IParser")
+        if(not issubclass(type(feature_selection),IFeatureSelection) and feature_selection is not None): raise TypeError("Not a subtype of IFeatureSelection")
+        if(not issubclass(type(model),IAlgorithm)): raise TypeError("Not a subtype of IAlgorithm")
+        if(not issubclass(type(model),ICrossValidation) and cross_validation is not None): raise TypeError("Not a subtype of ICrossValidation")
 
         self.dataset_parser = dataset_parser
         self.feature_selection = feature_selection
         self.cross_validation = cross_validation
         self.model = model
-        self.eopatch_ids = self.dataset_parser.create_dataframe(self.dataset_parser.dataset)["EOPATCH"]
+        self.eopatch_ids = self.dataset_parser.create_dataframe()["EOPATCH"]
         self.eopatch_ids = self.eopatch_ids.unique()
         self.dataset_array = self.dataset_parser.convert(fit_for_variable);
         self.fit_for_variable = fit_for_variable

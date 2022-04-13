@@ -2,6 +2,8 @@ from eolearn.core import EOTask,FeatureType
 from eolearn.features import LinearInterpolation
 import numpy as np
 
+from ..dataset.TSPatch import TSPatch
+
 
 class SentinelHubValidData:
     """
@@ -33,14 +35,14 @@ class NormalizedDifferenceIndex(EOTask):
     """
     def __init__(self, feature_name, band_a, band_b):
         self.feature_name = feature_name
-        self.band_a_fetaure_name = band_a.split('/')[0]
-        self.band_b_fetaure_name = band_b.split('/')[0]
-        self.band_a_fetaure_idx = int(band_a.split('/')[-1])
-        self.band_b_fetaure_idx = int(band_b.split('/')[-1])
+        self.band_a_feature_name = band_a.split('/')[0]
+        self.band_b_feature_name = band_b.split('/')[0]
+        self.band_a_feature_idx = int(band_a.split('/')[-1])
+        self.band_b_feature_idx = int(band_b.split('/')[-1])
         
     def execute(self, eopatch):
-        band_a = eopatch.data[self.band_a_fetaure_name][..., self.band_a_fetaure_idx]
-        band_b = eopatch.data[self.band_b_fetaure_name][..., self.band_b_fetaure_idx]
+        band_a = eopatch.data[self.band_a_feature_name][..., self.band_a_feature_idx]
+        band_b = eopatch.data[self.band_b_feature_name][..., self.band_b_feature_idx]
         
         ndi = (band_a - band_b) / (band_a  + band_b)
         
@@ -80,9 +82,7 @@ class InterpolationTask(EOTask):
         )
         return linear_interp.execute(eopatch)
 
-def band(band_id,bands):
-    t,w,h,_ = bands.shape
-    return bands[...,band_id].reshape(t,w,h,1) 
+
 
 class AddIndicesTask(EOTask):
     def __init__(self, index_dic,available_bands):
@@ -90,16 +90,18 @@ class AddIndicesTask(EOTask):
         self.available_bands = available_bands
 
     def execute(self, eopatch):
-        indices = ["RVI","NDVI74","IRECI","GM","GNDVI","RECHI","REPLI","S2REP","SRRE","NDVI_NB"]
-
         bands = eopatch.data["BANDS"]
-        for key,value in self.index_dic:
+        def band(band_id):
+            t,w,h,_ = bands.shape
+            return bands[...,band_id].reshape(t,w,h,1) 
+        
+        for key,value in self.index_dic.items():
 
             new_index = value
-            for band in self.available_bands:
-                if band in new_index:
-                    new_index = new_index.replace(band,f"bands({self.available_bands.index(band)})")
-
-            eopatch.data[key] = eval(new_index)
+            for available_band in self.available_bands:
+                if available_band in new_index:
+                    new_index = new_index.replace(available_band,f"band({self.available_bands.index(available_band)})")
+            new_value = eval(new_index)
+            eopatch.data[key] = new_value
             np.nan_to_num(eopatch.data[key],copy=False,nan=0,posinf=0,neginf=0)
         return eopatch        
