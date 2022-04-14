@@ -25,6 +25,7 @@ class Parser(IParser):
         
     dataset = property(_get_dataset,None,None,"""The dataset that was parsed""")
     features = property(_get_features,None,None,"""The features that exist in this array""")
+    
     def create_dataframe(self,subset=None, indices=None, bands=None, dataset_extra_data=["N","P","K"],image_identifier="Point_ID"):
         """Creates the dataframe ready for the algorithm processing
 
@@ -40,10 +41,10 @@ class Parser(IParser):
         """
         if not isinstance(subset, list) and subset is not None: raise TypeError("Subset must be a list of EOPatches")
         tmp_indices = INDICES[-1]
-        if indices == None:
+        if indices is None:
             indices = tmp_indices#+dataset_extra_data+[image_identifier]
 
-        if bands == None:
+        if bands is None:
             bands = BANDS
 
         if subset is not None:
@@ -62,15 +63,20 @@ class Parser(IParser):
         # self.imagery = indices+len(dataset_extra_data)+1 #dataset_extra_data+image_identifier
         
         #for i,eopatch in enumerate(self.dataset.get_eopatches()[eopatches_indices]):
+        excluded_patches = []
         for i,eopatch in enumerate(self.subset):
-            mask = eopatch.get_masked_region()
-            values = eopatch.get_values_of_masked_region(indices,bands)
-            for extra_variable in dataset_extra_data:
-                values[extra_variable] = eopatch.get_dataset_entry_value(extra_variable,is_pixelized=True)
-            
-            values[image_identifier] = eopatch.get_dataset_entry_value(image_identifier,is_pixelized=True)
-            values = pd.DataFrame(values)
-            save_dataframe = save_dataframe.append(values, ignore_index=True)
+            try:
+                mask = eopatch.get_masked_region()
+                values = eopatch.get_values_of_masked_region(indices,bands)
+                for extra_variable in dataset_extra_data:
+                    values[extra_variable] = eopatch.get_dataset_entry_value(extra_variable,is_pixelized=True)
+                
+                values[image_identifier] = eopatch.get_dataset_entry_value(image_identifier,is_pixelized=True)
+                values = pd.DataFrame(values)
+                save_dataframe = save_dataframe.append(values, ignore_index=True)
+            except:
+                #no groudtruth for you :c
+                excluded_patches.append(eopatch)
 
         self.save_dataframe = save_dataframe
         return self.save_dataframe
@@ -88,13 +94,13 @@ class Parser(IParser):
             ExecError: If the create_dataframe method wasn't called before.
         """
 
-        if(self.save_dataframe == None):
+        if(self.save_dataframe is None):
             raise ExecError("Parser.create_dataframe must be called before")
-        if(image_ids == None):
-            vals = self.save_dataframe.round(2)            
+        if(image_ids is None):
+            vals = self.save_dataframe.round(2)
         else:
-            vals = self.save_dataframe.round(2)[self.save_dataframe[self.image_identifier].isin(image_ids)]
-        if(features == None):
+            vals = self.save_dataframe[self.save_dataframe[self.image_identifier].isin(image_ids)].round(2)
+        if(features is None):
             x_values = vals[self.indices+self.bands].values.reshape(-1,len(self.indices+self.bands))
         else:
             x_values = vals[features].values.reshape(-1,len(features))

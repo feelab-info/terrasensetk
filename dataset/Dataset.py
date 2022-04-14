@@ -60,13 +60,14 @@ class Dataset:
         execution_args = []
         save = SaveTask(self.eopatches_folder, overwrite_permission=OverwritePermission.OVERWRITE_PATCH)
         workflow = LinearWorkflow(load, add_indices,save)
-
-        for i in range(0,len(os.listdir(self.eopatches_folder))):
+        eopatch_folders = os.listdir(self.eopatches_folder)
+        print(len(eopatch_folders))
+        for i in eopatch_folders:
             execution_args.append(
             {
-                load: {'eopatch_folder': f'eopatch_{i}'},
+                load: {'eopatch_folder': f'{i}'},
                 add_indices: {},
-                save: {'eopatch_folder': f'eopatch_{i}'}
+                save: {'eopatch_folder': f'{i}'}
             })
         executor = EOExecutor(workflow, execution_args, save_logs=True)
         executor.run(workers=5, multiprocess=False)
