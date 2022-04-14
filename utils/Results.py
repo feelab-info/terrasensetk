@@ -25,7 +25,7 @@ class Results:
         return self.model.predict(self.x_test)
         
     def __str__(self):
-        return f"x_test: {type(self._get_x_test())}\ny_test: {type(self._get_y_test())}\nx_train: {type(self._get_x_train())}\ny_train: {type(self._get_y_train())}\nmodel: {self._get_model()}\nfeatures: {self._get_features()}\ny_pred: {type(self._get_y_pred())}"
+        return f"Results Object: [\n    x_test: {type(self._get_x_test())}\n    y_test: {type(self._get_y_test())}\n    x_train: {type(self._get_x_train())}\n    y_train: {type(self._get_y_train())}\n    model: {self._get_model()}\n    features: {self._get_features()}\n    y_pred: {type(self._get_y_pred())}]"
 
     def __repr__(self):
         return self.__str__()
