@@ -11,8 +11,8 @@ class SequentialFeatureSelector(IFeatureSelection):
         self.model = sklearnFeatureSelector(estimator=estimator,n_features_to_select=number_of_features,*args)
         self.number_of_features = number_of_features
 
-    def fit(self,*kwargs):
-        return self.model.fit_transform(*kwargs[0],*kwargs[1])
+    def fit(self,x,y,*args):
+        return self.model.fit_transform(x,y,*args)
 
     def predict(self,*kwargs):
         return self.model.predict(*kwargs)

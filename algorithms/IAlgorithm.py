@@ -3,12 +3,12 @@ class IAlgorithm(abc.ABC):
 
 
     @abc.abstractmethod
-    def fit(*kwargs):
+    def fit(x,y,*kwargs):
         pass
 
 
     @abc.abstractmethod
-    def predict(*kwargs):
+    def predict(x,*kwargs):
         pass
 
     @abc.abstractmethod

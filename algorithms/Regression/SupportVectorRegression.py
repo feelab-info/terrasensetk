@@ -6,8 +6,8 @@ class SupportVectorRegression(IAlgorithm):
     def __init__(self,*args,**kargs):
         self.model = SVR(*args)
 
-    def fit(self,x_values,y_values):
-        return self.model.fit(x_values,y_values)
+    def fit(self,x_values,y_values,*args):
+        return self.model.fit(x_values,y_values,*args)
 
     def predict(self,x_values):
         if(not self.model.is_fit()): 

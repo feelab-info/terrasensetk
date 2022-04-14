@@ -6,5 +6,5 @@ class KFold(ICrossValidation):
         self.model = sklKFold(*args)
 
     def split(self,values_to_split):
-        self.model.split(values_to_split)
+        return self.model.split(values_to_split)
 

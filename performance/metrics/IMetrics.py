@@ -59,15 +59,17 @@ class IMetrics:
         return new_list
 
     def __calculate_metrics__(self, results, metric_list):
-        column_results = {}
+        column_results = []
         for i,result in enumerate(results):
             metrics_results = {}
+            #metrics_results["run"] = i
             for calc in metric_list:
                 metrics_results[calc] = self.callFunction(calc,result.y_test, result.y_pred)
-            metrics_results = pd.DataFrame(metrics_results)
 
-            column_results[f"result {i}"] = metrics_results
-        return column_results
+            column_results.append(metrics_results)
+        tmpdf = pd.DataFrame(column_results)
+        tmpdf.index.name = "Run"
+        return tmpdf
 
     def __cleanup_results(self, results):
         return results
