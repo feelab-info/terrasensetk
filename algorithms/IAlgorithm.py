@@ -12,5 +12,9 @@ class IAlgorithm(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def clone(cls):
+    def clone(self):
+        pass
+
+    @abc.abstractmethod
+    def get_params(self):
         pass

@@ -13,6 +13,8 @@ class Parser(IParser):
             raise TypeError("Must be a subtype of terrasensetk.Dataset")
         if subset is None:
             self.subset = dataset.get_eopatches()
+        else:
+            self.subset = subset
         self.indices = INDICES
         self.bands = BANDS
         self._dataset = dataset
@@ -55,8 +57,8 @@ class Parser(IParser):
         self.dataset_extra_data = dataset_extra_data
         self.image_identifier = image_identifier
         
-        if self.save_dataframe is not None:
-            return self.save_dataframe
+        #if self.save_dataframe is not None:
+        #    return self.save_dataframe
         
         # all_features = indices+bands
         save_dataframe = pd.DataFrame(columns=indices+bands+dataset_extra_data+[image_identifier]) 

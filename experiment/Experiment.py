@@ -8,13 +8,14 @@ from ..dataset import Dataset
 from ..dataset.parser import IParser
 from sklearn.model_selection import train_test_split
 class Experiment:
-    def __init__(self, dataset_parser,model, feature_selection=None, cross_validation=None,fit_for_variable="N",train_test_split=60):
+    def __init__(self,name, dataset_parser,model, feature_selection=None, cross_validation=None,fit_for_variable="N",train_test_split=60):
         
         if(not issubclass(type(dataset_parser),IParser)): raise TypeError("Not a subtype of IParser")
         if(not issubclass(type(feature_selection),IFeatureSelection) and feature_selection is not None): raise TypeError("Not a subtype of IFeatureSelection")
         if(not issubclass(type(model),IAlgorithm)): raise TypeError("Not a subtype of IAlgorithm")
         if(not issubclass(type(cross_validation),ICrossValidation) and cross_validation is not None): raise TypeError("Not a subtype of ICrossValidation")
-
+        if(not isinstance(name,str)): raise TypeError("An Experiment name must be provided")
+        self.name = name
         self.dataset_parser = dataset_parser
         self.feature_selection = feature_selection
         self.cross_validation = cross_validation
@@ -60,5 +61,17 @@ class Experiment:
         if(self.results is None): raise TypeError("Execute method was not called yet.")
         if not issubclass(type(metrics),IMetrics):
             raise TypeError("Metrics is not a subtype of MetricsBase")
-    
-        return metrics.check_metrics(self.results,list_of_metrics)
+        self.metrics_results = metrics.check_metrics(self.results,list_of_metrics)
+        return self.metrics_results
+
+    def log_run(self):
+        run_name = self.name
+        with mlflow.start_run(run_name=run_name):
+              mlflow.log_param("batch_size", batch_size)
+              mlflow.log_param("learning_rate", learning_rate)
+              mlflow.log_param("epochs", epochs)
+              mlflow.log_metric("train_loss", train_loss)
+              mlflow.log_metric("train_accuracy", train_acc)
+              mlflow.log_metric("val_loss", val_loss)
+              mlflow.log_metric("val_accuracy", val_acc)
+              mlflow.log_artifacts(self.results)
