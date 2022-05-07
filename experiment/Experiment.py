@@ -8,23 +8,25 @@ from ..dataset import Dataset
 from ..dataset.parser import IParser
 from sklearn.model_selection import train_test_split
 class Experiment:
-    def __init__(self,name, dataset_parser,model, feature_selection=None, cross_validation=None,fit_for_variable="N",train_test_split=60):
+    def __init__(self,name, dataset_parser,models, feature_selection=None, cross_validation=None,input_features=None,fit_for_variable="N",train_test_split=60):
         
-        if(not issubclass(type(dataset_parser),IParser)): raise TypeError("Not a subtype of IParser")
-        if(not issubclass(type(feature_selection),IFeatureSelection) and feature_selection is not None): raise TypeError("Not a subtype of IFeatureSelection")
-        if(not issubclass(type(model),IAlgorithm)): raise TypeError("Not a subtype of IAlgorithm")
-        if(not issubclass(type(cross_validation),ICrossValidation) and cross_validation is not None): raise TypeError("Not a subtype of ICrossValidation")
+        if(not issubclass(type(dataset_parser),IParser)): raise TypeError(f"{type(dataset_parser)} is not a subtype of IParser")
+        if(not issubclass(type(feature_selection),IFeatureSelection) and feature_selection is not None): raise TypeError(f"{type(feature_selection)} is not a subtype of IFeatureSelection")
+        for i in models:
+            if(not issubclass(type(i),IAlgorithm)): raise TypeError(f"{type(i)} is not a subtype of IAlgorithm")    
+        if(not issubclass(type(cross_validation),ICrossValidation) and cross_validation is not None): raise TypeError(f"{type(cross_validation)} is not a subtype of ICrossValidation")
         if(not isinstance(name,str)): raise TypeError("An Experiment name must be provided")
         self.name = name
         self.dataset_parser = dataset_parser
         self.feature_selection = feature_selection
         self.cross_validation = cross_validation
-        self.model = model
+        self.models = models
         self.eopatch_ids = self.dataset_parser.create_dataframe(image_identifier="Point_ID")["Point_ID"]
         self.eopatch_ids = self.eopatch_ids.unique()
         self.dataset_array = self.dataset_parser.convert(fit_for_variable);
         self.fit_for_variable = fit_for_variable
         self.train_test_split=train_test_split
+        self.input_features = input_features
 
 
     def execute(self):
@@ -33,31 +35,40 @@ class Experiment:
         if(self.feature_selection is not None):
             x = self.feature_selection.fit(x,y)
             features = self.feature_selection.get_model().get_feature_names_out(self.dataset_parser.features)
-        results = []
+        elif(self.input_features is not None):
+
+            for feature in self.input_features:
+                if(feature not in features): raise TypeError(f"The feature '{feature}' is not in {features}")
+            
+            features = list(set(features) & set(self.input_features))
+
+        results = {}
         if(self.cross_validation is not None):
             folds = self.cross_validation.split(self.eopatch_ids)
-
-            for i,(train,test) in enumerate(folds):
-                model = self.model.clone()
-                x_train,y_train = self.dataset_parser.convert(self.fit_for_variable,image_ids=self.eopatch_ids[train],features=features)
-                x_test,y_test = self.dataset_parser.convert(self.fit_for_variable,image_ids=self.eopatch_ids[test],features=features)
+            for j,model in enumerate(self.models):
+                results[j] = []
+                for i,(train,test) in enumerate(folds):
+                    model = model.clone()
+                    x_train,y_train = self.dataset_parser.convert(self.fit_for_variable,image_ids=self.eopatch_ids[train],features=features)
+                    x_test,y_test = self.dataset_parser.convert(self.fit_for_variable,image_ids=self.eopatch_ids[test],features=features)
+                    model.fit(x_train,y_train)
+                    model.predict(x_test)
+                    results[j].append(Results(x_test,y_test,x_train,y_train,model,features))
+        else:
+            train,test = train_test_split(self.eopatch_ids,train_size=self.train_test_split)
+            for i,model in enumerate(self.models):
+                results[i] = []
+                x_train,y_train = self.dataset_parser.convert(self.fit_for_variable,image_ids=train,features=features)
+                x_test,y_test = self.dataset_parser.convert(self.fit_for_variable,image_ids=test,features=features)
                 model.fit(x_train,y_train)
                 model.predict(x_test)
-                results.append(Results(x_test,y_test,x_train,y_train,model,features))
-        else:
-            train,test = train_test_split(self.eopatch_ids)
-            model = self.model.clone()
-            x_train,y_train = self.dataset_parser.convert(self.fit_for_variable,image_ids=train,features=features)
-            x_test,y_test = self.dataset_parser.convert(self.fit_for_variable,image_ids=test,features=features)
-            model.fit(x_train,y_train)
-            model.predict(x_test)
-            results.append(Results(x_test,y_test,x_train,y_train,model,features))
+                results[i].append(Results(x_test,y_test,x_train,y_train,model,features))
         self.results = results
         return self.results
 
 
 
-    def calculate_metrics(self,metrics,list_of_metrics=['rmse']):
+    def calculate_metrics(self,metrics,list_of_metrics=['rmse','mae']):
         if(self.results is None): raise TypeError("Execute method was not called yet.")
         if not issubclass(type(metrics),IMetrics):
             raise TypeError("Metrics is not a subtype of MetricsBase")
