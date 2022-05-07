@@ -81,7 +81,7 @@ class Dataset:
         Returns:
             DataFrame: 
         """
-        if self.dfeopatches != None:
+        if self.dfeopatches is not None:
             return self.dfeopatches
         tmp_arr = []
         cols = self._eopatches[-1].vector_timeless["LOCATION"].columns.values.tolist()
