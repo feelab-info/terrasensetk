@@ -1,1 +1,5 @@
 from .SupportVectorRegression import SupportVectorRegression
+from .GradientBoostingRegressor import GradientBoostingRegressor
+from .MLPRegressor import MLPRegressor
+from .RandomForestRegressor import RandomForestRegressor
+from .PLSRegressor import PLSRegressor

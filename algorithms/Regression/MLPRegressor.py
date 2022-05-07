@@ -1,17 +1,15 @@
-from sklearn.svm import SVR
 from ..IAlgorithm import IAlgorithm
 from sklearn.base import clone
-class SupportVectorRegression(IAlgorithm):
+from sklearn.neural_network import MLPRegressor as MLPR
+class MLPRegressor(IAlgorithm):
 
     def __init__(self,*args,**kargs):
-        self.model = SVR(*args)
+        self.model = MLPR(*args)
 
     def fit(self,x_values,y_values,*args):
         return self.model.fit(x_values,y_values,*args)
 
     def predict(self,x_values):
-        if(self.model.fit_status_ != 0): 
-            raise TypeError("The model is not fitted yet")
         return self.model.predict(x_values)
 
     def get_model(self):

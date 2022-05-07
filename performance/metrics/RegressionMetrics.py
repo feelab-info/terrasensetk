@@ -4,7 +4,7 @@ from sklearn import metrics
 import pandas as pd
 import numpy as np
 import sklearn
-from .metric_utils import aux_error_checking
+from .metric_utils import aux_error_checking,aux_get_size
 import math
 
 class RegressionMetrics(IMetrics):
