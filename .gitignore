@@ -2,3 +2,4 @@ eoexecution-*
 .ipynb_checkpoints
 .vscode
 __pycache__
+mlruns
