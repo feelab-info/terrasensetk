@@ -1,6 +1,7 @@
 from sklearn.svm import SVR
 from ..IAlgorithm import IAlgorithm
-from sklearn.base import clone
+from sklearn.base import clone as skclone
+from ...performance.metrics import RegressionMetrics 
 class SupportVectorRegression(IAlgorithm):
 
     def __init__(self,*args,**kargs):
@@ -18,7 +19,19 @@ class SupportVectorRegression(IAlgorithm):
         return self.model
     
     def clone(self):
-        return clone(self.model)
+        return skclone(self.model)
 
     def get_params(self):
         return self.model.get_params()
+
+    def objective_function(self,trial,x_train,y_train,x_test,y_test):
+        metric = RegressionMetrics()
+        kernel=trial.suggest_categorical('kernel',['rbf','poly','linear','sigmoid'])
+        c=trial.suggest_float("C",0.1,3.0)
+        gamma=trial.suggest_categorical('gamma',['auto','scale'])
+        degree=trial.suggest_int("degree",1,3)
+
+        regr = SupportVectorRegression(kernel = kernel, C = c, gamma = gamma, degree = degree,n_jobs=2)
+        regr.fit(x_train, y_train)
+        y_pred = regr.predict(x_test)
+        return metric.cmd_rmse(y_test, y_pred)

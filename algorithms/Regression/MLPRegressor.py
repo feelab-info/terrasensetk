@@ -1,6 +1,8 @@
 from ..IAlgorithm import IAlgorithm
 from sklearn.base import clone
 from sklearn.neural_network import MLPRegressor as MLPR
+from ...performance.metrics import RegressionMetrics
+
 class MLPRegressor(IAlgorithm):
 
     def __init__(self,*args,**kargs):
@@ -20,3 +22,19 @@ class MLPRegressor(IAlgorithm):
 
     def get_params(self):
         return self.model.get_params()
+
+    def objective_function(self,trial,x_train,y_train,x_test,y_test):
+        metric = RegressionMetrics()
+        random_state = trial.suggest_int('random_state', 1, 10000)
+        max_iter =  trial.suggest_int('max_iter', 200, 500)
+        activation = trial.suggest_int('activation',['identity', 'logistic', 'tanh', 'relu'])
+        learning_rate = trial.suggest_categorical('learning_rate',['constant', 'invscaling', 'adaptive'])
+        solver = trial.suggest_categorical('solver', ['adam','sgd','lbfgs'])
+        if solver in ['adam','sgd']:
+            learning_rate_init= trial.suggest_float('learning_rate_init',0.0001,1.5) 
+            regr = MLPRegressor(learning_rate = learning_rate, max_iter = max_iter, random_state = random_state,activation = activation,learning_rate_init = learning_rate_init, n_jobs=2)
+        else:
+            regr = MLPRegressor(learning_rate = learning_rate, max_iter = max_iter,random_state = random_state,activation = activation, n_jobs=2)
+        regr.fit(x_train, y_train)
+        y_pred = regr.predict(x_test)
+        return metric.cmd_rmse(y_test, y_pred)
