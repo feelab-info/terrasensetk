@@ -6,7 +6,6 @@ class IAlgorithm(abc.ABC):
     def fit(x,y,*kwargs):
         pass
 
-
     @abc.abstractmethod
     def predict(x,*kwargs):
         pass
@@ -17,6 +16,10 @@ class IAlgorithm(abc.ABC):
 
     @abc.abstractmethod
     def get_params(self):
+        pass
+    
+    @abc.abstractmethod
+    def set_params(self,params):
         pass
 
     @abc.abstractmethod

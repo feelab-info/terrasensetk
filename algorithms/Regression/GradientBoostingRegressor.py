@@ -1,6 +1,7 @@
 from ..IAlgorithm import IAlgorithm
 from sklearn.base import clone
 from sklearn.ensemble import GradientBoostingRegressor as GBR
+from ...performance.metrics import RegressionMetrics
 class GradientBoostingRegressor(IAlgorithm):
 
     def __init__(self,*args,**kargs):
@@ -20,3 +21,9 @@ class GradientBoostingRegressor(IAlgorithm):
 
     def get_params(self):
         return self.model.get_params()
+
+    def set_params(self,**params):
+        return self.model.set_params(**params)
+        
+    def objective_function(self,trial,x_train,y_train,x_test,y_test):
+        raise NotImplementedError("GBM HPO not available")
