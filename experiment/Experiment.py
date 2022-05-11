@@ -31,7 +31,7 @@ class Experiment:
         self.input_features = input_features
 
 
-    def execute(self, perform_optimization=True):
+    def execute(self, perform_optimization=True,n_trials=100):
         rand_state = 1337
         x,y = self.dataset_parser.convert(self.fit_for_variable)
         features=self.dataset_parser.features
@@ -51,7 +51,7 @@ class Experiment:
             for i,model in enumerate(self.models):
                 try:
                     study = optuna.create_study(direction='minimize')
-                    study.optimize(lambda trial: model.objective_function(trial,x_train,y_train,x_test,y_test),n_trials=2)
+                    study.optimize(lambda trial: model.objective_function(trial,x_train,y_train,x_test,y_test),n_trials=n_trials)
                     params = study.best_params
                     model.set_params(params)
 
