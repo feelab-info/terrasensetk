@@ -5,8 +5,11 @@ from ...performance.metrics import RegressionMetrics
 
 class MLPRegressor(IAlgorithm):
 
-    def __init__(self,*args,**kargs):
-        self.model = MLPR(*args)
+    def __init__(self,kargs=None):
+        if kargs is None:
+            self.model = MLPR()
+            return
+        self.model = MLPR(**kargs)
 
     def fit(self,x_values,y_values,*args):
         return self.model.fit(x_values,y_values,*args)
@@ -35,9 +38,9 @@ class MLPRegressor(IAlgorithm):
         solver = trial.suggest_categorical('solver', ['adam','sgd','lbfgs'])
         if solver in ['adam','sgd']:
             learning_rate_init= trial.suggest_float('learning_rate_init',0.0001,1.5) 
-            regr = MLPRegressor(learning_rate = learning_rate, max_iter = max_iter, random_state = random_state,activation = activation,learning_rate_init = learning_rate_init, n_jobs=2)
+            regr = MLPRegressor({'learning_rate': learning_rate, 'max_iter': max_iter, 'random_state': random_state,'activation': activation,'learning_rate_init': learning_rate_init, 'n_job':2})
         else:
-            regr = MLPRegressor(learning_rate = learning_rate, max_iter = max_iter,random_state = random_state,activation = activation, n_jobs=2)
+            regr= MLPRegressor({'learning_rate' : learning_rate, 'max_iter' : max_iter,'random_state' : random_state,'activation' : activation, 'n_jobs':2})
         regr.fit(x_train, y_train)
         y_pred = regr.predict(x_test)
         return metric.cmd_rmse(y_test, y_pred)

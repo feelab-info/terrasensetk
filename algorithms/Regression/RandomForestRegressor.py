@@ -5,8 +5,11 @@ from ...performance.metrics import RegressionMetrics
 
 class RandomForestRegressor(IAlgorithm):
 
-    def __init__(self,*args,**kargs):
-        self.model = RFR(*args)
+    def __init__(self,kargs=None):
+        if kargs is None:
+            self.model = RFR()
+            return
+        self.model = RFR(**kargs)
 
     def fit(self,x_values,y_values,*args):
         return self.model.fit(x_values,y_values,*args)
@@ -36,9 +39,9 @@ class RandomForestRegressor(IAlgorithm):
         max_leaf_nodes = trial.suggest_int('max_leaf_nodes', 1, 10000)
         n_estimators =  trial.suggest_int('n_estimators', 30, 1000)
 
-        regr = RandomForestRegressor(bootstrap = bootstrap, criterion = criterion,
-                                    max_depth = max_depth, max_features = max_features,
-                                    max_leaf_nodes = max_leaf_nodes,n_estimators = n_estimators,n_jobs=2)
+        regr = RandomForestRegressor({'bootstrap': bootstrap, 'criterion': criterion,
+                                    'max_depth': max_depth, 'max_features': max_features,
+                                    'max_leaf_nodes': max_leaf_nodes,'n_estimators': n_estimators,'n_jobs':2})
         regr.fit(x_train, y_train)
         y_pred = regr.predict(x_test)
         return metric.cmd_rmse(y_test, y_pred)
