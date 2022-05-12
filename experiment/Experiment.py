@@ -35,6 +35,7 @@ class Experiment:
         rand_state = 1337
         x,y = self.dataset_parser.convert(self.fit_for_variable)
         features=self.dataset_parser.features
+
         if(self.feature_selection is not None):
             x = self.feature_selection.fit(x,y)
             features = self.feature_selection.get_model().get_feature_names_out(self.dataset_parser.features)
@@ -44,6 +45,7 @@ class Experiment:
                 if(feature not in features): raise TypeError(f"The feature '{feature}' is not in {features}")
             
             features = list(set(features) & set(self.input_features))
+
         x,y = self.dataset_parser.convert(self.fit_for_variable,features=features)
         x_train,x_test = train_test_split(x,random_state = rand_state,train_size=self.train_test_split)
         y_train,y_test = train_test_split(y,random_state = rand_state,train_size=self.train_test_split)
@@ -57,6 +59,7 @@ class Experiment:
 
                 except NotImplementedError:
                     print(f"HPO: The model {model} doesn't contain an objective function, the model will be trained with the supplied arguments")
+                    
         results = {}
         if(self.cross_validation is not None):
             folds = self.cross_validation.split(self.eopatch_ids)
