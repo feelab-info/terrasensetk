@@ -64,7 +64,7 @@ class IMetrics:
             for j, result in enumerate(results[i]):
                 
                 metrics_results = {}
-                metrics_results["algorithm idex"] = i
+                metrics_results["algorithm"] = str(type(result.model)).split('.')[-1].split('\'')[0] #get name of the algorithm
                 metrics_results["run"] = j+1
                 for calc in metric_list:
                     metrics_results[calc] = self.callFunction(calc,result.y_test, result.y_pred)
