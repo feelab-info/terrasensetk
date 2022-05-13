@@ -38,7 +38,7 @@ class MLPRegressor(IAlgorithm):
         solver = trial.suggest_categorical('solver', ['adam','sgd','lbfgs'])
         if solver in ['adam','sgd']:
             learning_rate_init= trial.suggest_float('learning_rate_init',0.0001,1.5) 
-            regr = MLPRegressor({'learning_rate': learning_rate, 'max_iter': max_iter, 'random_state': random_state,'activation': activation,'learning_rate_init': learning_rate_init, 'n_job':2})
+            regr = MLPRegressor({'learning_rate': learning_rate, 'max_iter': max_iter, 'random_state': random_state,'activation': activation,'learning_rate_init': learning_rate_init, 'n_jobs':2})
         else:
             regr= MLPRegressor({'learning_rate' : learning_rate, 'max_iter' : max_iter,'random_state' : random_state,'activation' : activation, 'n_jobs':2})
         regr.fit(x_train, y_train)

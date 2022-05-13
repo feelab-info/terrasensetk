@@ -37,7 +37,7 @@ class RandomForestRegressor(IAlgorithm):
         max_depth = trial.suggest_int('max_depth', 1, 10000)
         max_features = trial.suggest_categorical('max_features', ['auto', 'sqrt','log2'])
         max_leaf_nodes = trial.suggest_int('max_leaf_nodes', 1, 10000)
-        n_estimators =  trial.suggest_int('n_estimators', 30, 1000)
+        n_estimators =  trial.suggest_int('n_estimators', 30, 130)
 
         regr = RandomForestRegressor({'bootstrap': bootstrap, 'criterion': criterion,
                                     'max_depth': max_depth, 'max_features': max_features,
