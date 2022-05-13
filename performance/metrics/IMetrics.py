@@ -8,10 +8,11 @@ class IMetrics:
     def __init__(self):
             return
 
-    def check_metrics(self, results, metric_list):
+    def check_metrics(self, results, metric_list,normalization_value=None):
         """
         :param results: Results Array
         :param metric_list: Set of metrics to calculate
+        :param normalization_value: The ymax-ymin, not required
         :return: Dataframe containing metrics for the Results objects
         """
 
@@ -20,7 +21,7 @@ class IMetrics:
         unique_metrics_v2 = self.__remove_undefinedMetrics__(unique_metrics_v1)
 
         # Calculate the metrics
-        column_results = self.__calculate_metrics__(results, unique_metrics_v2)
+        column_results = self.__calculate_metrics__(results, unique_metrics_v2,normalization_value)
         results = self.__cleanup_results(column_results)
 
         return results
@@ -58,7 +59,7 @@ class IMetrics:
                 new_list = new_list[new_list != metric]
         return new_list
 
-    def __calculate_metrics__(self, results, metric_list):
+    def __calculate_metrics__(self, results, metric_list,normalization_value=None):
         column_results = []
         for i in results:
             for j, result in enumerate(results[i]):
@@ -68,6 +69,8 @@ class IMetrics:
                 metrics_results["run"] = j+1
                 for calc in metric_list:
                     metrics_results[calc] = self.callFunction(calc,result.y_test, result.y_pred)
+                    if normalization_value is not None:
+                        metrics_results["n_"+calc] = metrics_results[calc]/normalization_value
 
                 column_results.append(metrics_results)
         tmpdf = pd.DataFrame(column_results)

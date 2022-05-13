@@ -85,6 +85,8 @@ class RegressionMetrics(IMetrics):
     def cmd_psde(self, state_gt, state_pred):
         """
         Percent Standard Deviation Explained: 1 - sqrt(1 - r-squared)
+        Percent deviation measures the degree to which individual data
+        points in a statistic deviate from the average measurement of that statistic.
         """
 
         if aux_error_checking(state_gt, state_pred):

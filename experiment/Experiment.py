@@ -34,6 +34,7 @@ class Experiment:
     def execute(self, perform_optimization=True,n_trials=100):
         rand_state = 1337
         x,y = self.dataset_parser.convert(self.fit_for_variable)
+        self.y_interval = y.max()-y.min()
         features=self.dataset_parser.features
 
         if(self.feature_selection is not None):
@@ -87,7 +88,7 @@ class Experiment:
         if(self.results is None): raise TypeError("Execute method was not called yet.")
         if not issubclass(type(metrics),IMetrics):
             raise TypeError("Metrics is not a subtype of MetricsBase")
-        self.metrics_results = metrics.check_metrics(self.results,list_of_metrics)
+        self.metrics_results = metrics.check_metrics(self.results,list_of_metrics,self.y_interval)
         return self.metrics_results
 
     def log_run(self):
