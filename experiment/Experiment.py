@@ -52,10 +52,11 @@ class Experiment:
         y_train,y_test = train_test_split(y,random_state = rand_state,train_size=self.train_test_split)
         if perform_optimization:
             for i,model in enumerate(self.models):
+                self.study=None
                 try:
-                    study = optuna.create_study(direction='minimize')
-                    study.optimize(lambda trial: model.objective_function(trial,x_train,y_train,x_test,y_test),n_trials=n_trials)
-                    params = study.best_params
+                    self.study = optuna.create_study(direction='minimize')
+                    self.study.optimize(lambda trial: model.objective_function(trial,x_train,y_train,x_test,y_test),n_trials=n_trials)
+                    params = self.study.best_params
                     model.set_params(params)
 
                 except NotImplementedError:
@@ -82,7 +83,7 @@ class Experiment:
         x_test,y_test = self.dataset_parser.convert(self.fit_for_variable,image_ids=test,features=features)
         model.fit(x_train,y_train)
         model.predict(x_test)
-        return Results(x_test,y_test,x_train,y_train,model,features,model.get_params())
+        return Results(x_test,y_test,x_train,y_train,model,features,model.get_params(),self.study)
 
     def calculate_metrics(self,metrics,list_of_metrics=['rmse','mae']):
         if(self.results is None): raise TypeError("Execute method was not called yet.")
