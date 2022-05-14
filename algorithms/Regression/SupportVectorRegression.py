@@ -4,11 +4,14 @@ from sklearn.base import clone as skclone
 from ...performance.metrics import RegressionMetrics 
 class SupportVectorRegression(IAlgorithm):
 
-    def __init__(self,kargs=None):
-        if kargs is None:
-            self.model = SVR()
-            return
-        self.model = SVR(**kargs)
+    def __init__(self,args={},**kwargs):
+        model = SVR
+        if args:
+            self.model = model(**args)
+        elif kwargs:
+            self.model = model(**kwargs)
+        else:
+            self.model = model()
 
     def fit(self,x_values,y_values,*args):
         return self.model.fit(x_values,y_values,*args)
@@ -37,7 +40,7 @@ class SupportVectorRegression(IAlgorithm):
         gamma=trial.suggest_categorical('gamma',['auto','scale'])
         degree=trial.suggest_int("degree",1,3)
 
-        regr = SupportVectorRegression({'kernel': kernel, 'C': c, 'gamma': gamma, 'degree': degree,'n_jobs':2})
+        regr = SupportVectorRegression({'kernel': kernel, 'C': c, 'gamma': gamma, 'degree': degree})
         regr.fit(x_train, y_train)
         y_pred = regr.predict(x_test)
         return metric.cmd_rmse(y_test, y_pred)

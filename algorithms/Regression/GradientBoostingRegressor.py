@@ -4,11 +4,14 @@ from sklearn.ensemble import GradientBoostingRegressor as GBR
 from ...performance.metrics import RegressionMetrics
 class GradientBoostingRegressor(IAlgorithm):
 
-    def __init__(self,kargs=None):
-        if kargs is None:
-            self.model = GBR()
-            return
-        self.model = GBR(**kargs)
+    def __init__(self,args={},**kwargs):
+        model = GBR
+        if args:
+            self.model = model(**args)
+        elif kwargs:
+            self.model = model(**kwargs)
+        else:
+            self.model = model()
 
     def fit(self,x_values,y_values,*args):
         return self.model.fit(x_values,y_values,*args)

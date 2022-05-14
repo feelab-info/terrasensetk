@@ -4,11 +4,14 @@ from sklearn.cross_decomposition import PLSRegression as PLSR
 
 class PLSRegressor(IAlgorithm):
 
-    def __init__(self,kargs=None):
-        if kargs is None:
-            self.model = PLSR()
-            return
-        self.model = PLSR(**kargs)
+    def __init__(self,args={},**kwargs):
+        model = PLSR
+        if args:
+            self.model = model(**args)
+        elif kwargs:
+            self.model = model(**kwargs)
+        else:
+            self.model = model()
 
     def fit(self,x_values,y_values,*args):
         return self.model.fit(x_values,y_values,*args)
