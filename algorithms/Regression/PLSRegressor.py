@@ -1,3 +1,4 @@
+from ...performance.metrics import RegressionMetrics
 from ..IAlgorithm import IAlgorithm
 from sklearn.base import clone
 from sklearn.cross_decomposition import PLSRegression as PLSR
@@ -24,7 +25,7 @@ class PLSRegressor(IAlgorithm):
         return self.model
     
     def clone(self):
-        return clone(self.model)
+        return PLSRegressor(self.get_params())
 
     def get_params(self):
         return self.model.get_params()
@@ -33,4 +34,12 @@ class PLSRegressor(IAlgorithm):
         return self.model.set_params(**params)
         
     def objective_function(self,trial,x_train,y_train,x_test,y_test):
-        raise NotImplementedError("Nop")
+        metric = RegressionMetrics()
+        n_components = trial.suggest_int('n_components',1,x_train.shape[1])
+        max_iter = trial.suggest_int('max_iter',200,600)
+        regr = PLSRegressor({'n_components':n_components,'max_iter':max_iter})
+        
+        regr.fit(x_train, y_train)
+        y_pred = regr.predict(x_test)
+        return metric.cmd_rmse(y_test, y_pred)
+
