@@ -23,7 +23,7 @@ class GradientBoostingRegressor(IAlgorithm):
         return self.model
     
     def clone(self):
-        return clone(self.model)
+        return GradientBoostingRegressor(self.get_params())
 
     def get_params(self):
         return self.model.get_params()

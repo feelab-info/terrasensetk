@@ -23,3 +23,6 @@ class IAlgorithm(abc.ABC):
 
     def objective_function(self,trial,x_train,y_train,x_test,y_test):
         raise NotImplementedError(f"Objective function for {type(self)} not implemented")
+
+    def get_name(self):
+        return str(type(self)).split('.')[-1].split('\'')[0]

@@ -21,7 +21,7 @@ class SequentialFeatureSelector(IFeatureSelection):
         return self.model
 
     def clone(self):
-        return clone(self.model)
+        return SequentialFeatureSelector(self.get_params())
 
     def get_params(self):
         return self.model.get_params()

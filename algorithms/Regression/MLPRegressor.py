@@ -24,7 +24,7 @@ class MLPRegressor(IAlgorithm):
         return self.model
     
     def clone(self):
-        return clone(self.model)
+        return MLPRegressor(self.get_params())
 
     def get_params(self):
         return self.model.get_params()
@@ -34,7 +34,7 @@ class MLPRegressor(IAlgorithm):
         
     def objective_function(self,trial,x_train,y_train,x_test,y_test):
         metric = RegressionMetrics()
-        random_state = trial.suggest_int('random_state', 1, 10000)
+        random_state = trial.suggest_int('random_state', 1, 300)
         max_iter =  trial.suggest_int('max_iter', 200, 500)
         activation = trial.suggest_categorical('activation',['identity', 'logistic', 'tanh', 'relu'])
         learning_rate = trial.suggest_categorical('learning_rate',['constant', 'invscaling', 'adaptive'])

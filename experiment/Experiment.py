@@ -92,14 +92,25 @@ class Experiment:
         self.metrics_results = metrics.check_metrics(self.results,list_of_metrics,self.y_interval)
         return self.metrics_results
 
-    def log_run(self):
+    def log_runs(self):
+        import mlflow
         run_name = self.name
-        with mlflow.start_run(run_name=run_name):
-              mlflow.log_param("batch_size", batch_size)
-              mlflow.log_param("learning_rate", learning_rate)
-              mlflow.log_param("epochs", epochs)
-              mlflow.log_metric("train_loss", train_loss)
-              mlflow.log_metric("train_accuracy", train_acc)
-              mlflow.log_metric("val_loss", val_loss)
-              mlflow.log_metric("val_accuracy", val_acc)
-              mlflow.log_artifacts(self.results)
+        for model_batch in self.results:
+            for i, run in enumerate(model_batch):
+                with mlflow.start_run(run_name=f"{run.model.get_name()} - run {i}"):
+                    for k,v in run.model.get_params():
+                        mlflow.log_param(k,v)
+                    metrics = self.metrics.columns[2:]
+                    for metric in metrics:
+                        mlflow.log_metric(metric,self.metrics_results.query("algorithm == @run.model.get_name() and run == @i")[metric].values[0])
+                    mlflow.log_artifacts(run)
+
+        # with mlflow.start_run(run_name=run_name):
+        #       mlflow.log_param("batch_size", batch_size)
+        #       mlflow.log_param("learning_rate", learning_rate)
+        #       mlflow.log_param("epochs", epochs)
+        #       mlflow.log_metric("train_loss", train_loss)
+        #       mlflow.log_metric("train_accuracy", train_acc)
+        #       mlflow.log_metric("val_loss", val_loss)
+        #       mlflow.log_metric("val_accuracy", val_acc)
+        #       mlflow.log_artifacts(self.results)
