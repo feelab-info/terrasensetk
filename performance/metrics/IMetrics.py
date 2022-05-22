@@ -69,6 +69,8 @@ class IMetrics:
                 metrics_results["run"] = j+1
                 for calc in metric_list:
                     metrics_results[calc] = self.callFunction(calc,result.y_test, result.y_pred)
+                    if(isinstance(metrics_results[calc],np.ndarray)):
+                        metrics_results[calc] = metrics_results[calc][-1]
                     if normalization_value is not None:
                         metrics_results["n_"+calc] = metrics_results[calc]/normalization_value
 
