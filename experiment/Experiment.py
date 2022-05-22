@@ -28,6 +28,7 @@ class Experiment:
         self.feature_selection_complete=False
         self.cross_validation_complete=False
         self.folds=None
+        self.study=None
 
     def execute_feature_selection(self,feature_selection=None):
 
