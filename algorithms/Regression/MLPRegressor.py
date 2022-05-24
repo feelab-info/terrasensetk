@@ -34,16 +34,16 @@ class MLPRegressor(IAlgorithm):
         
     def objective_function(self,trial,x_train,y_train,x_test,y_test):
         metric = RegressionMetrics()
-        random_state = trial.suggest_int('random_state', 1, 300)
-        max_iter =  trial.suggest_int('max_iter', 200, 500)
-        activation = trial.suggest_categorical('activation',['identity', 'logistic', 'tanh', 'relu'])
-        learning_rate = trial.suggest_categorical('learning_rate',['constant', 'invscaling', 'adaptive'])
-        solver = trial.suggest_categorical('solver', ['adam','sgd','lbfgs'])
+        
+        max_iter =  trial.suggest_int('max_iter', 200, 1000,100)
+        activation = trial.suggest_categorical('activation',['logistic', 'relu'])
+        #learning_rate = trial.suggest_categorical('learning_rate',['constant', 'invscaling', 'adaptive'])
+        solver = trial.suggest_categorical('solver', ['adam','sgd'])
         if solver in ['adam','sgd']:
-            learning_rate_init= trial.suggest_float('learning_rate_init',0.0001,1.5) 
-            regr = MLPRegressor({'learning_rate': learning_rate, 'max_iter': max_iter, 'random_state': random_state,'activation': activation,'learning_rate_init': learning_rate_init})
+            learning_rate_init= trial.suggest_categorical('learning_rate_init',[float(1e-5),float(1e-4),float(1e-3)]) 
+            regr = MLPRegressor({'learning_rate': 'constant', 'max_iter': max_iter, 'activation': activation,'learning_rate_init': learning_rate_init})
         else:
-            regr= MLPRegressor({'learning_rate' : learning_rate, 'max_iter' : max_iter,'random_state' : random_state,'activation' : activation})
+            regr= MLPRegressor({'learning_rate' : 'constant', 'max_iter' : max_iter,'activation' : activation})
         regr.fit(x_train, y_train)
         y_pred = regr.predict(x_test)
         return metric.cmd_rmse(y_test, y_pred)

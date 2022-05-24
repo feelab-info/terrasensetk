@@ -41,9 +41,9 @@ class RandomForestRegressor(IAlgorithm):
         criterion = trial.suggest_categorical('criterion', ['squared_error', 'absolute_error'])
         # bootstrap = trial.suggest_categorical('bootstrap',['True','False'])
         # max_depth = trial.suggest_int('max_depth', 1, 200)
-        max_features = trial.suggest_categorical('max_features', ['auto', 'sqrt','log2'])
+        max_features = trial.suggest_categorical('max_features', ['sqrt','log2'])
         # max_leaf_nodes = trial.suggest_int('max_leaf_nodes', 1, 2000)
-        n_estimators = trial.suggest_int('n_estimators', 30, 130)
+        n_estimators = trial.suggest_int('n_estimators', 30, 300)
         regr = RandomForestRegressor({'bootstrap': True, 'criterion': criterion,
                                     'max_features': max_features,
                                     'n_estimators': n_estimators,'n_jobs':2})
