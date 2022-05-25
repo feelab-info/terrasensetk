@@ -36,7 +36,7 @@ class SupportVectorRegression(IAlgorithm):
     def objective_function(self,trial,x_train,y_train,x_test,y_test):
         metric = RegressionMetrics()
         kernel=trial.suggest_categorical('kernel',['rbf','sigmoid'])
-        c=trial.suggest_float("C",0.1,3.0,0.5)
+        c=trial.suggest_float("C",0.1,3.0,step=0.5)
         gamma=trial.suggest_categorical('gamma',['auto','scale'])
         #degree=trial.suggest_int("degree",1,3)
         regr = SupportVectorRegression({'kernel': kernel, 'C': c, 'gamma': gamma})

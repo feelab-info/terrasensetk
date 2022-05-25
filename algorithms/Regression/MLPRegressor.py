@@ -35,7 +35,7 @@ class MLPRegressor(IAlgorithm):
     def objective_function(self,trial,x_train,y_train,x_test,y_test):
         metric = RegressionMetrics()
         
-        max_iter =  trial.suggest_int('max_iter', 200, 1000,100)
+        max_iter =  trial.suggest_int('max_iter', 200, 1000,step=100)
         activation = trial.suggest_categorical('activation',['logistic', 'relu'])
         #learning_rate = trial.suggest_categorical('learning_rate',['constant', 'invscaling', 'adaptive'])
         solver = trial.suggest_categorical('solver', ['adam','sgd'])
