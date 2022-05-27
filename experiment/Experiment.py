@@ -49,7 +49,7 @@ class Experiment:
         if self.cross_validation is not None:
             self.folds = self.cross_validation.split(self.eopatch_ids)
             self.cross_validation_complete=True
-            return self.folds
+            return list(self.folds)
         raise Exception("No cross validation provided!")
 
     def execute(self, perform_optimization=True,n_trials=100,folds=None):
