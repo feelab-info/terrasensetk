@@ -106,7 +106,17 @@ class Parser(IParser):
             x_values = vals[self.indices+self.bands].values.reshape(-1,len(self.indices+self.bands))
         else:
             x_values = vals[features].values.reshape(-1,len(features))
-        y_values = vals[variable_to_fit].values.reshape(-1,1).ravel()        
-        return (x_values,y_values)
+        y_values = vals[variable_to_fit].values.reshape(-1,1).ravel()
+        ids = self._get_image_indices(vals[self.image_identifier].values.reshape(-1,1).ravel())
+        return (x_values,y_values,ids)
     
-    
+    def _get_image_indices(cls,arr):
+        v = {}
+        tmp = "";
+        for i,val in enumerate(arr): 
+            if(tmp == val):
+                v[val][1] = i
+            else:
+                v[val] = [i,i]
+            tmp = val
+        return v

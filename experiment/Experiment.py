@@ -24,7 +24,7 @@ class Experiment:
         self.fit_for_variable = fit_for_variable
         self.train_test_split=train_test_split
         self.input_features = input_features
-        self.x,self.y = self.dataset_array
+        self.x,self.y,_ = self.dataset_array
         self.feature_selection_complete=False
         self.cross_validation_complete=False
         self.folds=None
@@ -47,9 +47,9 @@ class Experiment:
         if self.folds: 
             return self.folds
         if self.cross_validation is not None:
-            self.folds = self.cross_validation.split(self.eopatch_ids)
+            self.folds = list(self.cross_validation.split(self.eopatch_ids))
             self.cross_validation_complete=True
-            return list(self.folds)
+            return self.folds
         raise Exception("No cross validation provided!")
 
     def execute(self, perform_optimization=True,n_trials=100,folds=None):
@@ -57,7 +57,7 @@ class Experiment:
         rand_state = 1337
         self.y_interval = self.y.max()-self.y.min()
         features = self._define_features()
-        self.x,self.y = self.dataset_parser.convert(self.fit_for_variable,features=features)
+        self.x,self.y,_ = self.dataset_parser.convert(self.fit_for_variable,features=features)
         x_train,x_test = train_test_split(self.x,random_state = rand_state,train_size=self.train_test_split)
         y_train,y_test = train_test_split(self.y,random_state = rand_state,train_size=self.train_test_split)
         if perform_optimization:
@@ -108,11 +108,11 @@ class Experiment:
 
     def _get_results_for_model(self, features, model, train, test):
         model = model.clone()
-        x_train,y_train = self.dataset_parser.convert(self.fit_for_variable,image_ids=train,features=features)
-        x_test,y_test = self.dataset_parser.convert(self.fit_for_variable,image_ids=test,features=features)
+        x_train,y_train,ids_train = self.dataset_parser.convert(self.fit_for_variable,image_ids=train,features=features)
+        x_test,y_test,ids_test = self.dataset_parser.convert(self.fit_for_variable,image_ids=test,features=features)
         model.fit(x_train,y_train)
         model.predict(x_test)
-        return Results(x_test,y_test,x_train,y_train,model,features,model.get_params(),self.study)
+        return Results(x_test,y_test,x_train,y_train,model,features,model.get_params(),ids_train,ids_test,self.study)
 
     def calculate_metrics(self,metrics,list_of_metrics=['rmse','mae']):
         if(self.results is None): raise TypeError("Execute method was not called yet.")
