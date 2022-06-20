@@ -82,7 +82,7 @@ class Experiment:
             for j,model in enumerate(self.models):
                     results[j] = []
                     for i,(train,test) in enumerate(self.folds):
-                        results[j].append(self._get_results_for_model(features, model, self.eopatch_ids[train], self.eopatch_ids[train]))
+                        results[j].append(self._get_results_for_model(features, model, self.eopatch_ids[train], self.eopatch_ids[test]))
             
         else:
             train,test = train_test_split(self.eopatch_ids,train_size=self.train_test_split)
