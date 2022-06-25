@@ -53,7 +53,7 @@ class Experiment:
         raise Exception("No cross validation provided!")
 
     def execute(self, perform_optimization=True,n_trials=100,folds=None):
-        
+        self.perform_optimization = perform_optimization
         rand_state = 1337
         self.y_interval = self.y.max()-self.y.min()
         features = self._define_features()
@@ -124,9 +124,13 @@ class Experiment:
     def log_runs(self):
         import mlflow
         run_name = self.name
+        mlflow.set_experiment(self.name)
+        experiment = mlflow.get_experiment_by_name(self.name)
+        if(self.perform_optimization): txt = "with HPO"
+        else: txt = "without HPO"
         for j,model_batch in self.results.items():
             for i, run in enumerate(model_batch):
-                with mlflow.start_run(run_name=f"{run.model.get_name()} - run {i}"):
+                with mlflow.start_run(experiment_id=experiment.experiment_id,run_name=f"{run.model.get_name()} - run {i} - {txt}"):
                     for k,v in run.model.get_params().items():
                         mlflow.log_param(k,v)
                     metrics = self.metrics_results.columns[2:]
