@@ -32,4 +32,14 @@ class GradientBoostingRegressor(IAlgorithm):
         return self.model.set_params(**params)
         
     def objective_function(self,trial,x_train,y_train,x_test,y_test):
-        raise NotImplementedError("GBM HPO not available")
+        metric = RegressionMetrics()
+        
+        loss = trial.suggest_categorical('loss',['squared_error', 'absolute_error', 'huber', 'quantile'])
+        learning_rate = trial.suggest_float('learning_rate',0.05,0.5,step=0.05)
+        n_estimators = trial.suggest_int('n_estimators', 200, 1000,step=100)
+        
+        regr= GradientBoostingRegressor({'loss' : loss, 'learning_rate' : learning_rate,'n_estimators' : n_estimators})
+        
+        regr.fit(x_train, y_train)
+        y_pred = regr.predict(x_test)
+        return metric.cmd_rmse(y_test, y_pred)
