@@ -28,7 +28,7 @@ class GradientBoostingRegressor(IAlgorithm):
     def get_params(self):
         return self.model.get_params()
 
-    def set_params(self,**params):
+    def set_params(self,params):
         return self.model.set_params(**params)
         
     def objective_function(self,trial,x_train,y_train,x_test,y_test):
