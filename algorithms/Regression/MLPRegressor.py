@@ -35,15 +35,17 @@ class MLPRegressor(IAlgorithm):
     def objective_function(self,trial,x_train,y_train,x_test,y_test):
         metric = RegressionMetrics()
         
-        max_iter =  trial.suggest_int('max_iter', 200, 1000,step=100)
+        max_iter =  1000
         activation = trial.suggest_categorical('activation',['logistic', 'relu'])
         #learning_rate = trial.suggest_categorical('learning_rate',['constant', 'invscaling', 'adaptive'])
         solver = trial.suggest_categorical('solver', ['adam','sgd'])
+        n_iter_no_change = 100
+
         if solver in ['adam','sgd']:
             learning_rate_init= trial.suggest_categorical('learning_rate_init',[float(1e-5),float(1e-4),float(1e-3)]) 
-            regr = MLPRegressor({'learning_rate': 'constant', 'max_iter': max_iter, 'activation': activation,'learning_rate_init': learning_rate_init})
+            regr = MLPRegressor({'learning_rate': 'constant','n_iter_no_change':n_iter_no_change, 'max_iter': max_iter, 'activation': activation,'learning_rate_init': learning_rate_init})
         else:
-            regr= MLPRegressor({'learning_rate' : 'constant', 'max_iter' : max_iter,'activation' : activation})
+            regr = MLPRegressor({'learning_rate': 'constant','n_iter_no_change':n_iter_no_change, 'max_iter' : max_iter,'activation' : activation})
         regr.fit(x_train, y_train)
         y_pred = regr.predict(x_test)
         return metric.cmd_rmse(y_test, y_pred)
