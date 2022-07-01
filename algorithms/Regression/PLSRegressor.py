@@ -36,7 +36,7 @@ class PLSRegressor(IAlgorithm):
     def objective_function(self,trial,x_train,y_train,x_test,y_test):
         metric = RegressionMetrics()
         n_components = trial.suggest_int('n_components',1,x_train.shape[1])
-        max_iter = trial.suggest_int('max_iter',200,1000,step=50)
+        max_iter = 1000 #trial.suggest_int('max_iter',200,1000,step=50)
         regr = PLSRegressor({'n_components':n_components,'max_iter':max_iter})
         
         regr.fit(x_train, y_train)
