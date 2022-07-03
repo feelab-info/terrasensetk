@@ -7,6 +7,7 @@ from ..performance.ICrossValidation import ICrossValidation
 from ..dataset import Dataset
 from ..dataset.parser import IParser
 import optuna
+from copy import deepcopy
 from sklearn.model_selection import train_test_split
 class Experiment:
     def __init__(self,name, dataset_parser,models, feature_selection=None, cross_validation=None,input_features=None,fit_for_variable="N",train_test_split=0.60):
@@ -28,7 +29,7 @@ class Experiment:
         self.feature_selection_complete=False
         self.cross_validation_complete=False
         self.folds=None
-        self.study=None
+        self.study=[]
 
     def execute_feature_selection(self,feature_selection=None):
 
@@ -62,11 +63,11 @@ class Experiment:
         y_train,y_test = train_test_split(self.y,random_state = rand_state,train_size=self.train_test_split)
         if perform_optimization:
             for i,model in enumerate(self.models):
-                self.study=None
+                self.study[i]=None
                 try:
-                    self.study = optuna.create_study(direction='minimize')
-                    self.study.optimize(lambda trial: model.objective_function(trial,x_train,y_train,x_test,y_test),n_trials=n_trials)
-                    params = self.study.best_params
+                    self.study[i] = optuna.create_study(direction='minimize')
+                    self.study[i].optimize(lambda trial: model.objective_function(trial,x_train,y_train,x_test,y_test),n_trials=n_trials)
+                    params = self.study[i].best_params
                     model.set_params(params)
 
                 except NotImplementedError:
@@ -106,13 +107,13 @@ class Experiment:
             features = self.features
         return features
 
-    def _get_results_for_model(self, features, model, train, test):
-        model = model.clone()
+    def _get_results_for_model(self, features, amodel, train, test):
+        model = amodel.clone()
         x_train,y_train,ids_train = self.dataset_parser.convert(self.fit_for_variable,image_ids=train,features=features)
         x_test,y_test,ids_test = self.dataset_parser.convert(self.fit_for_variable,image_ids=test,features=features)
         model.fit(x_train,y_train)
         model.predict(x_test)
-        return Results(x_test,y_test,x_train,y_train,model,features,model.get_params(),ids_train,ids_test,self.study)
+        return Results(x_test,y_test,x_train,y_train,model,features,model.get_params(),ids_train,ids_test,self.study[self.models.index(amodel)])
 
     def calculate_metrics(self,metrics,list_of_metrics=['rmse','mae']):
         if(self.results is None): raise TypeError("Execute method was not called yet.")
