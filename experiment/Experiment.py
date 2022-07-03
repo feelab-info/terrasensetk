@@ -63,7 +63,7 @@ class Experiment:
         y_train,y_test = train_test_split(self.y,random_state = rand_state,train_size=self.train_test_split)
         if perform_optimization:
             for i,model in enumerate(self.models):
-                self.study[i]=None
+                self.study.append("")
                 try:
                     self.study[i] = optuna.create_study(direction='minimize')
                     self.study[i].optimize(lambda trial: model.objective_function(trial,x_train,y_train,x_test,y_test),n_trials=n_trials)
