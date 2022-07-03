@@ -113,7 +113,11 @@ class Experiment:
         x_test,y_test,ids_test = self.dataset_parser.convert(self.fit_for_variable,image_ids=test,features=features)
         model.fit(x_train,y_train)
         model.predict(x_test)
-        return Results(x_test,y_test,x_train,y_train,model,features,model.get_params(),ids_train,ids_test,self.study[self.models.index(amodel)])
+        try:
+            study = self.study[self.models.index(amodel)]
+        except:
+            study = None
+        return Results(x_test,y_test,x_train,y_train,model,features,model.get_params(),ids_train,ids_test,study)
 
     def calculate_metrics(self,metrics,list_of_metrics=['rmse','mae']):
         if(self.results is None): raise TypeError("Execute method was not called yet.")
