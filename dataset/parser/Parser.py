@@ -28,7 +28,7 @@ class Parser(IParser):
     dataset = property(_get_dataset,None,None,"""The dataset that was parsed""")
     features = property(_get_features,None,None,"""The features that exist in this array""")
     
-    def create_dataframe(self,subset=None, indices=None, bands=None, dataset_extra_data=["N","P","K"],image_identifier="Point_ID"):
+    def create_dataframe(self,subset=None, indices=None, bands=None, dataset_extra_data=["N","P","K"],image_identifier="Point_ID",force_create=False):
         """Creates the dataframe ready for the algorithm processing
 
         Args:
@@ -41,6 +41,9 @@ class Parser(IParser):
         Returns:
             [type]: [description]
         """
+        if not force_create:
+            if self.save_dataframe is not None:
+                return self.save_dataframe
         if not isinstance(subset, list) and subset is not None: raise TypeError("Subset must be a list of EOPatches")
         tmp_indices = INDICES[-1]
         if indices is None:
