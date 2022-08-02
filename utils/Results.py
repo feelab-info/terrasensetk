@@ -12,6 +12,7 @@ class Results:
         self._study = study
         self._ids_train = ids_train
         self._ids_test = ids_test
+        self._y_pred = None
     
     def _get_x_test(self):
         return self._x_test
@@ -28,7 +29,10 @@ class Results:
     def _get_parameters(self):
         return self._parameters
     def _get_y_pred(self):
-        return self.model.predict(self.x_test)
+        if self._y_pred is None:
+            self._y_pred = self.model.predict(self.x_test)
+        return self._y_pred
+
     def _get_study(self):
         return self._study
     def _get_ids_test(self):
