@@ -164,7 +164,8 @@ class TSPatch(EOPatch):
         eopatch = self.patch
         mask = self.get_masked_region()
         if is_pixelized:
-            return eopatch.vector_timeless["LOCATION"][nutrient].values[0]*mask[mask!=0]
+            #return eopatch.vector_timeless["LOCATION"][nutrient].values[0]*mask[mask!=0]
+            return [eopatch.vector_timeless["LOCATION"][nutrient].values[0] for i in range(0,len(mask[mask!=0]))]
         return eopatch.vector_timeless["LOCATION"][nutrient].values[0]
 
     def get_eopatch_mask(self,index, include_indices = True):
