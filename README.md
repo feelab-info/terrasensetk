@@ -17,10 +17,10 @@ The other files constitute the Particle Library itself:
 
 ## Getting Started
 
-### 1. Install Particle CLI
+### 1. Install TSTK
 
 ```
-$ npm install -g particle-cli
+$ conda install terrasensetk
 ```
 
 ### 2. Init new library
