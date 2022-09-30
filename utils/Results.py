@@ -1,6 +1,7 @@
 
 class Results:
-
+    """ Class used by the experiment to return all the information needed to perform further data analysis.
+    """
     def __init__(self,x_test,y_test,x_train,y_train,model,features,parameters,ids_train,ids_test,study=None):
         self._x_test = x_test
         self._y_test = y_test

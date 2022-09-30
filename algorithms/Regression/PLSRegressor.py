@@ -4,7 +4,8 @@ from sklearn.base import clone
 from sklearn.cross_decomposition import PLSRegression as PLSR
 
 class PLSRegressor(IAlgorithm):
-
+    """Implementation of the PartialLeastSquaresRegressor from the scikitlearn library
+    """
     def __init__(self,args={},**kwargs):
         model = PLSR
         if args:

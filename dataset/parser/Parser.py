@@ -39,7 +39,7 @@ class Parser(IParser):
             image_identifier(string, optional): The identifying column on the information in the METADATA portion of dataset.
 
         Returns:
-            [type]: [description]
+            Dataframe: The dataframe which has in a readable form for machine learning.
         """
         if not force_create:
             if self.save_dataframe is not None:

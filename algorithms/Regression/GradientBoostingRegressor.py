@@ -3,7 +3,8 @@ from sklearn.base import clone
 from sklearn.ensemble import GradientBoostingRegressor as GBR
 from ...performance.metrics import RegressionMetrics
 class GradientBoostingRegressor(IAlgorithm):
-
+    """Implementation of the GradientBoostingRegressor from the scikitlearn library
+    """
     def __init__(self,args={},**kwargs):
         model = GBR
         if args:

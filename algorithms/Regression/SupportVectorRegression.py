@@ -3,7 +3,8 @@ from ..IAlgorithm import IAlgorithm
 from sklearn.base import clone as skclone
 from ...performance.metrics import RegressionMetrics 
 class SupportVectorRegression(IAlgorithm):
-
+    """Implementation of the SupportVectorRegression from the scikitlearn library
+    """
     def __init__(self,args={},**kwargs):
         model = SVR
         if args:

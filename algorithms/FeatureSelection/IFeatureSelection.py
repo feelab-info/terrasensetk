@@ -4,7 +4,8 @@ from numpy import number
 
 from ..IAlgorithm import IAlgorithm
 class IFeatureSelection(IAlgorithm):
-
+    """Base class for implementation of the Feature Selection Algorithms
+    """
 
     def __init__(self,number_of_features,*kwargs):
         self.number_of_features = number_of_features
