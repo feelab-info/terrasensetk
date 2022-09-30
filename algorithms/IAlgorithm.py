@@ -1,6 +1,7 @@
 import abc
 class IAlgorithm(abc.ABC):
-
+    """Defines the base class for the implementation of algorithms.
+    """
 
     @abc.abstractmethod
     def fit(x,y,**kwargs):

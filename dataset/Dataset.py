@@ -25,32 +25,33 @@ class Dataset:
         return self._eopatches[index]
 
     def add_index(self,index_name, index_formula):
+        """Adds a specific index to the dataset in question
+        NOTE:To make the index persist `save_indices_to_patches` must be called
+
+        Args:
+            index_name (str): The name of the index
+            index_formula (str): The formula for the specified index
+
+        Example:
+
+            >>>dataset.add_index("NDVI","(B07-B04)/(B07+B04)")
+            >>>dataset.add_index("IRECI","(B07-B04)/(B05/B06)")
+            >>>dataset.save_indices_to_patches()
+
+        """
         self.index_dic[index_name] = index_formula
-        # eopatch.data["NDVI74"] = (band(7) - band(4)) / (band(7) + band(4))
-        # eopatch.data["IRECI"] = (band(7) - band(4)) / (band(5) + band(6))
-        # eopatch.data["REM"] = (band(7) / band(5)) - 1
-        # eopatch.data["GM"] = (band(7) / band(3)) - 1
-        # rre = (band(7) + band(4)) / 2
-        # eopatch.data["REPLI"] = 700 + 40 * (rre - band(5)) / (band(6) - band(5))
-        # eopatch.data["RECHI"] = (band(6) - band(5))/band(5)
-        # eopatch.data["S2REP"] = 705 + 35 * ((rre - band(5)) / (band(6) - band(5)))
-        # eopatch.data["GNDVI"] = (band(8) - band(3)) / (band(8) + band(3))
-        # eopatch.data["SRRE"] = (band(5)) / (band(10))
-        # eopatch.data["NDVI_NB"] = (band(9)- band(4))/(band(9) + band(4))
-        # eopatch.data["RVI"] = (band(8) / band(4))
-        # add_IRECI = AddIndicesTask("IRECI")
-        # add_REM = AddIndicesTask("REM")
-        # add_GM = AddIndicesTask("GM")
-        # add_REPLI = AddIndicesTask("REPLI")
-        # add_RECHI = AddIndicesTask("RECHI")
-        # add_S2REP = AddIndicesTask("S2REP")
-        # add_GNDVI = AddIndicesTask("GNDVI")
-        # add_SRRE = AddIndicesTask("SRRE")
-        # add_NDVI_NB = AddIndicesTask("NDVI_NB")
-        # add_RVI = AddIndicesTask("RVI")
+
 
         
     def save_indices_to_eopatches(self):
+        """Saves the previously indicated indices into the dataset.
+
+        Example:
+
+            >>>dataset.add_index("NDVI","(B07-B04)/(B07+B04)")
+            >>>dataset.add_index("IRECI","(B07-B04)/(B05/B06)")
+            >>>dataset.save_indices_to_patches()
+        """
         load = LoadTask(self.eopatches_folder)
         
         available_bands = ['B01', 'B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B08', 'B8A', 'B09', 'B10', 'B11', 'B12']

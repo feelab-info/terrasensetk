@@ -10,6 +10,8 @@ import optuna
 from copy import deepcopy
 from sklearn.model_selection import train_test_split
 class Experiment:
+    """Implements the Experiment, which is a case study for performing Remote Soil Sensing Experiments.
+    """
     def __init__(self,name, dataset_parser,models, feature_selection=None, cross_validation=None,input_features=None,fit_for_variable="N",train_test_split=0.60):
         
         self._check_args(name, dataset_parser, models, feature_selection, cross_validation, train_test_split)
@@ -31,8 +33,19 @@ class Experiment:
         self.folds=None
         self.study=[]
 
-    def execute_feature_selection(self,feature_selection=None):
 
+    def execute_feature_selection(self,feature_selection=None):
+        """Executes the feature selection with the supplied argument.
+
+        Args:
+            feature_selection (terrasensetk.IFeatureSelection, optional): A Feature Selection algorithm. Defaults to None.
+
+        Raises:
+            Exception: If no feature selection was supplied in the experiment nor in the call of the method.
+
+        Returns:
+            array: The features that were selected by the algorithm
+        """
         if(self.feature_selection is not None):
             self.feature_selection.fit(self.x,self.y)
         elif(issubclass(type(feature_selection),IFeatureSelection) or feature_selection is not None):
@@ -44,7 +57,16 @@ class Experiment:
 
         return self.features
 
+    
     def execute_cross_validation(self):
+        """Executes the cross validation with the data from the dataset
+
+        Raises:
+            Exception: If no cross validation was supplied in the experiment
+
+        Returns:
+            arrays: the folds that were requested.
+        """
         if self.folds: 
             return self.folds
         if self.cross_validation is not None:
@@ -54,6 +76,17 @@ class Experiment:
         raise Exception("No cross validation provided!")
 
     def execute(self, perform_optimization=True,n_trials=100,folds=None):
+        """Executes the experiment
+
+        Args:
+            perform_optimization (bool, optional): Wether it should perform hyperparameter optimization. Defaults to True.
+            n_trials (int, optional): How many trails should be performed(in case of hyperparameter optimization). Defaults to 100.
+            folds (arrays, optional): If another experiment has been executed before and the user wants to use the same folds, it can be supplied here. Defaults to None.
+
+        Returns:
+            terrasensetk.results: A Results object which contains all the information to perform analysis.
+        """
+
         self.perform_optimization = perform_optimization
         rand_state = 1337
         self.y_interval = self.y.max()-self.y.min()
@@ -120,6 +153,18 @@ class Experiment:
         return Results(x_test,y_test,x_train,y_train,model,features,model.get_params(),ids_train,ids_test,study)
 
     def calculate_metrics(self,metrics,list_of_metrics=['rmse','mae']):
+        """Calculates the metrics with the internal experiment executed
+
+        Args:
+            metrics (IMetrics): The implementation of the metrics to use
+            list_of_metrics (list, optional): List of metrics to be used. Defaults to ['rmse','mae'].
+
+        Raises:
+            TypeError: If no execute was called or if the arguments supplied dont meet the correct type.
+
+        Returns:
+            dataframe: A dataframe with the required metrics, with their normalized counterparts.
+        """
         if(self.results is None): raise TypeError("Execute method was not called yet.")
         if not issubclass(type(metrics),IMetrics):
             raise TypeError("Metrics is not a subtype of MetricsBase")
@@ -127,6 +172,8 @@ class Experiment:
         return self.metrics_results
 
     def log_runs(self):
+        """Uses MLFLOW to log the experiments. (EXPERIMENTAL)
+        """
         import mlflow
         run_name = self.name
         mlflow.set_experiment(self.name)
