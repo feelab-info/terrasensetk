@@ -1,6 +1,6 @@
 MODULE_PATHS=$@
-SOURCE_DIR=docs/source
-BUILD_DIR=docs
+SOURCE_DIR=docs
+BUILD_DIR=docs/build
 
 for MODULE_PATH in $MODULE_PATHS
 do
