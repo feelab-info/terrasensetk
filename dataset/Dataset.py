@@ -26,6 +26,7 @@ class Dataset:
 
     def add_index(self,index_name, index_formula):
         """Adds a specific index to the dataset in question
+        
         NOTE:To make the index persist `save_indices_to_patches` must be called
 
         Args:
@@ -35,7 +36,9 @@ class Dataset:
         Example:
 
             >>>dataset.add_index("NDVI","(B07-B04)/(B07+B04)")
+
             >>>dataset.add_index("IRECI","(B07-B04)/(B05/B06)")
+
             >>>dataset.save_indices_to_patches()
 
         """

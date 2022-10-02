@@ -1,4 +1,3 @@
-
 class Results:
     """ Class used by the experiment to return all the information needed to perform further data analysis.
     """

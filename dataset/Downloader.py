@@ -30,7 +30,7 @@ class Downloader:
     
     """
 
-    def __init__(self,shapefile = None,bands = None, country = None, continent = None, config=None):~
+    def __init__(self,shapefile = None,bands = None, country = None, continent = None, config=None):
         
         self._init_classvars()
         if(shapefile is not None):

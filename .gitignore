@@ -3,3 +3,5 @@ eoexecution-*
 .vscode
 __pycache__
 mlruns
+docs/*
+!docs/source
