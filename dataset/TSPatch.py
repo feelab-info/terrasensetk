@@ -1,7 +1,11 @@
 from eolearn.core import EOPatch
 import numpy as np
 class TSPatch(EOPatch):
+    """Extends the functionality of the original eo-patch implementation with methods to include extra functionality
 
+    Args:
+        EOPatch (EOPatch): eo-learn abstraction to represent a single region 
+    """
     def __init__(self, eopatch = None):
         if eopatch is not None:
             self.patch=eopatch
@@ -108,15 +112,15 @@ class TSPatch(EOPatch):
         return mask_filtered
 
     def get_values_of_masked_region(self ,indices = None ,band_names = None,as_array=True):
-        """Returns the pixels in the masked region for the selected indices and band_names for each of the 
+        """Returns the pixels in the masked region for the selected `indices` and `band_names` for each of the patch
 
         Args:
-            indices ([type]): [description]
-            band_names ([type]): [description]
-            as_array (bool, optional): [description]. Defaults to True.
+            indices (str): The list of indices in which we want to get the values of
+            band_names (str): The list of indices in which we want to get the values of
+            as_array (bool, optional): If true returns in 1D array form(only the values with data), else returns in 2D array. Defaults to True.
 
         Returns:
-            [type]: [description]
+            ndarray: If `as_array` is true returns in 1D array form(only the values with data), else returns in 2D array.
         """
         values = {}
         eopatch = self.patch
@@ -133,6 +137,14 @@ class TSPatch(EOPatch):
         return values
 
     def represent_image(self,estimation):
+        """Draws an image with the values estimated
+
+        Args:
+            estimation (array): Array with the size of the masked region(1D)
+
+        Returns:
+            array: 2D image
+        """
         eopatch = self.patch
         mask = self.get_masked_region()
         mask = mask.astype(float)
@@ -151,15 +163,21 @@ class TSPatch(EOPatch):
 
 
     def get_dataset_entry_value(self,nutrient, is_pixelized = False):
-        """[summary]
+        """Returns the value of column in the dataset
 
         Args:
-            index (int): [description]
-            nutrient (string): Entry of the table (N,P,K)
+            nutrient (string): Entry of the table (N,P,K, or other)
             is_pixelized (bool, optional): If true returns the value in the shape of the mask, if not, returns a scalar(int). Defaults to False.
 
         Returns:
-            [type]: [description]
+            value|array: If `is_pixelized` is true returns the value in the shape of the mask, if not, returns a scalar(int).
+        
+        Example:
+        >>> patch.get_dataset_entry_value("N",True)
+        [1.9,1.9,1.9,...,1.9,]
+
+        >>> patch.get_dataset_entry_value("N",False)
+        1.9
         """
         eopatch = self.patch
         mask = self.get_masked_region()
@@ -168,8 +186,16 @@ class TSPatch(EOPatch):
             return [eopatch.vector_timeless["LOCATION"][nutrient].values[0] for i in range(0,len(mask[mask!=0]))]
         return eopatch.vector_timeless["LOCATION"][nutrient].values[0]
 
-    def get_eopatch_mask(self,index, include_indices = True):
-        
+    def get_eopatch_mask(self, include_indices = True):
+        """Can't remember what this does
+
+        Args:
+            include_indices (bool, optional): _description_. Defaults to True.
+
+        Returns:
+            _type_: _description_
+        """
+
         mask_filtered = self.get_masked_region();
         if include_indices : return (mask_filtered,mask_filtered.nonzero())
         return mask_filtered

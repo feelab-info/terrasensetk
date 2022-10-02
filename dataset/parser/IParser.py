@@ -1,7 +1,9 @@
 
 import abc
 class IParser(abc.ABC):
-    
+    """Base class for Parser.
+    Transforms data from a dataset into a format that is understandable by machine learning.
+    """
     @abc.abstractmethod
     def convert(self, variable_to_fit,image_ids=None,features=None):
         """Creates an array ready for fitting (x,y)
