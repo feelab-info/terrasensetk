@@ -1,4 +1,4 @@
-MODULE_PATHS=$@
+MODULE_PATHS=..
 SOURCE_DIR=docs
 BUILD_DIR=docs/build
 
