@@ -4,7 +4,8 @@ from sklearn.neural_network import MLPRegressor as MLPR
 from ...performance.metrics import RegressionMetrics
 
 class MLPRegressor(IAlgorithm):
-
+    """Implementation of the MultiLayerPerceptronRegressor from the scikitlearn library
+    """
     def __init__(self,args={},**kwargs):
         model = MLPR
         if args:

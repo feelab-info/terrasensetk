@@ -23,23 +23,15 @@ from rasterio.enums import MergeAlg
 import math
 import shapely
 import compress_pickle as cpickle
-#from .utils from ArgChecker
-"""
-        change location of lucas from meta_info to vector
-        
-        Get the images
-        Define the pipeline for writing the eopatches
-            allow for setting the bands needed
-            allow for adding extra tasks?
-            allow for adding addicional indexes
-        
-        add type check to arguments
-        need to define the lucas_copernicus csv
-    """
-class Downloader:
 
+class Downloader:
+    """
+    Class to download a dataset based on Lucas Copernicus
+    
+    """
 
     def __init__(self,shapefile = None,bands = None, country = None, continent = None, config=None):
+        
         self._init_classvars()
         if(shapefile is not None):
             self.dataset = gpd.read_file(shapefile)
@@ -56,28 +48,29 @@ class Downloader:
         #self._eopatch_size = eopatch_size
         self.dataset = self.dataset.to_crs(sh.CRS.WGS84.pyproj_crs())
 
-    """Loads the pickled Downloader object
-
-    Returns:
-        Downloader: An instance that was saved in the pickle file
-    """
+    
     @classmethod
     def from_pickle(self,file):
+        """Loads the pickled Downloader object
+
+        Returns:
+            Downloader: An instance that was saved in the pickle file
+        """
         with open(file,'rb') as f:
             instance = cpickle.load(f,compression="bz2")
             return instance
 
 
+        
+    def to_pickle(self,file):
         """ Pickles the current Downloader object that can be loaded by the ´from_pickle´ function
         """
-    def to_pickle(self,file):
         with open(file,'wb') as f:
             cpickle.dump(self,f,compression="bz2")
 
 
     def get_groundtruth(self,crop = None):
-        
-        """
+        """Returns the groundtruth example in the LUCAS Copernicus dataset
         Args:
             crop: which crop to filter by possible values: 
                 ['Grassland without tree/shrub cover',
@@ -190,10 +183,14 @@ class Downloader:
         self._dataset_bbox = None
         self._bbox_with_groundtruth = None
         self._ground_truth = None        
-    """
-        Subset should be a Reader.get_bbox_with_data() slice
-    """
+    
     def download_images(self,path,subset=None):
+        """Downloads the specified images into the users filesystem.
+
+        Args:
+            path (str): Path to where the dataset should be saved
+            subset (DataFrame, optional): Slice of the dataframe returned by `get_bbox_with_data()`.
+        """
         if subset is None:
             subset = self.get_bbox_with_data()
         if not os.path.isdir(path):
@@ -223,9 +220,7 @@ class Downloader:
 
         norm = EuclideanNorm('NORM','BANDS')
 
-        add_sh_valmask = AddValidDataMaskTask(SentinelHubValidData(), 
-                                      'IS_VALID' # name 15of output mask
-                                     )
+        add_sh_valmask = AddValidDataMaskTask(SentinelHubValidData(),'IS_VALID')
         add_valid_count = CountValid('IS_VALID', 'VALID_COUNT')
 
         concatenate = MergeFeatureTask({FeatureType.DATA: ['BANDS']},(FeatureType.DATA, 'FEATURES'))
@@ -235,9 +230,6 @@ class Downloader:
         for id, wrap_bbox in enumerate(subset.iterrows()):
             i, bbox = wrap_bbox
 
-            
-            #time_interval = []
-            #for point in bbox.SURVEY_DATE:
             time_interval = (get_time_interval(bbox.SURVEY_DATE,5))
             gdf = gpd.GeoDataFrame(bbox,crs=sh.CRS.WGS84.pyproj_crs())
             gdf = gdf.transpose()

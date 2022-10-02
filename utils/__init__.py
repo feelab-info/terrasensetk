@@ -4,3 +4,4 @@ from .utils import get_time_interval
 from .utils import to_square
 from .filtervectortoraster import FilterVectorToRaster
 from .eotasks import AddIndicesTask
+from .Results import Results

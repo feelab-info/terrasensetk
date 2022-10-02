@@ -5,7 +5,8 @@ from sklearn.ensemble import RandomForestRegressor as RFR
 from ...performance.metrics import RegressionMetrics
 
 class RandomForestRegressor(IAlgorithm):
-
+    """Implementation of the RandomForestRegressor from the scikitlearn library
+    """
     def __init__(self,args={},**kwargs):
         model = RFR
         if args:

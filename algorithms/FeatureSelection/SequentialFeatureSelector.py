@@ -6,7 +6,8 @@ from sklearn.feature_selection import SequentialFeatureSelector as sklearnFeatur
 
 from sklearn.ensemble import GradientBoostingRegressor
 class SequentialFeatureSelector(IFeatureSelection):
-
+    """Implementation of the SequentialFeatureSelector from the scikitlearn library with the GradientBoostingRegressor
+    """
     def __init__(self,number_of_features=5,estimator=GradientBoostingRegressor(),*args):
         self.model = sklearnFeatureSelector(estimator=estimator,n_features_to_select=number_of_features,*args)
         self.number_of_features = number_of_features
