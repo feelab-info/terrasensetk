@@ -12,8 +12,6 @@ A groundtruth dataset is already included in the toolkit which enables the creat
    :maxdepth: 3
    :caption: Package Contents:
 
-   ..
-
    terrasensetk
    
 Indices and tables

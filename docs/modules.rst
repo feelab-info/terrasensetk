@@ -1,5 +1,5 @@
-tstk
-====
+terrasensetk
+============
 
 .. toctree::
    :maxdepth: 4

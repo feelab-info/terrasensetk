@@ -9,38 +9,28 @@ from typing_inspect import get_origin
 
 class ArgChecker:
     """
-    | Methods for checking whether arguments passed into a function are of the provided
-    | types.
+    Methods for checking whether arguments passed into a function are of the provided types.
 
     """
 
     def enforce_type_hints(self, func):
-        """
-        | A decorator that ensures arguments passed into a function match the
-        | datatypes provided in the type hints.
-        |
-        | If any dtype is possible for an argument, use typing.Any as the type hint
-        |
-        | Example
-        | -------
-        | def add(a: int, b: int):
-        |   return a + b
-        |
-        | Without decorator: add('a', 'b') --> 'ab'  (func has unintended behavior)
-        | With decorator:    add('a', 'b') --> AssertionError
-        |
-        | -------------------------------------------------------------------------
-        | Parameters
-        | ----------
-        |  func
-        |    The function being decorated
-        |
-        |
-        | Returns
-        | -------
-        |  func_w_arg_dtypes_validated
-        |    The same function, but throwing an error if inputted dtypes do not
-        |    match type hints
+        """A decorator that ensures arguments passed into a function match the datatypes provided in the type hints.
+        If any dtype is possible for an argument, use typing.Any as the type hint        
+        
+        Args:
+            func(function):The function being decorated
+        
+        Returns:
+            func_w_arg_dtypes_validated: The same function, but throwing an error if inputted dtypes do not
+            match type hints
+        
+        Example:
+         
+         >>>    def add(a: int, b: int):
+         >>>        return a + b
+        
+         Without decorator: `add('a', 'b')` --> 'ab'  (func has unintended behavior)
+         With decorator:    `add('a', 'b')` --> AssertionError
         """
         # Get the meta-data from the function
         full_argspec = inspect.getfullargspec(func)
@@ -86,15 +76,14 @@ class ArgChecker:
         |    3) Adds np.int64 as a valid dtype if the accepted type is int
         |
         | -----------------------------------------------------------------------------------
-        | Parameters
-        | ----------
-        |  types_dict : dict
-        |    Dict of type hints
-        |    e.g. {'a': Union[int, str], 'b': Optional[str], 'c': pd.DataFrame}
+        | Args:
+        |
+        |  types_dict (dict): Dict of type hints \n
+        |    e.x. {'a': Union[int, str], 'b': Optional[str], 'c': pd.DataFrame}
         |
         |
-        | Returns
-        | -------
+        |Returns:
+        |
         |  dict
         |    Dict in format for direct comparison
         |    e.g. {'a': (int, np.int64, str), 'b': (str, NoneType), 'c': pd.DataFrame}

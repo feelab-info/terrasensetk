@@ -12,12 +12,8 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../'))
-sys.path.insert(0, os.path.abspath('../../dataset'))
-sys.path.insert(0, os.path.abspath('../../algorithms'))
-sys.path.insert(0, os.path.abspath('../../experiment'))
-sys.path.insert(0, os.path.abspath('../../performance'))
-sys.path.insert(0, os.path.abspath('../../utils'))
+sys.path.insert(0, os.path.abspath('../'))
+#print(f"============================================help ===========================\n{sys.path}")
 
 # -- Project information -----------------------------------------------------
 
@@ -59,7 +55,7 @@ html_theme = 'sphinx_rtd_theme'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-MOCK_MODULES = ['numpy', 'geopandas','eo-learn','sentinelhub','pandas','skimage','scikit-learn','sklearn','rasterio','gdal','scipy','numba']
+MOCK_MODULES = ['numpy', 'geopandas','eo-learn','sentinelhub','pandas','skimage','scikit-learn','sklearn','rasterio','gdal','scipy','numba','numpy.core.multiarray']
 autodoc_mock_imports = MOCK_MODULES
 
 master_doc = 'index'

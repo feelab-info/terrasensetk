@@ -35,11 +35,9 @@ class Dataset:
 
         Example:
 
-            >>>dataset.add_index("NDVI","(B07-B04)/(B07+B04)")\n
-
-            >>>dataset.add_index("IRECI","(B07-B04)/(B05/B06)")\n
-
-            >>>dataset.save_indices_to_patches()\n
+            >>> dataset.add_index("NDVI","(B07-B04)/(B07+B04)")
+            >>> dataset.add_index("IRECI","(B07-B04)/(B05/B06)")
+            >>> dataset.save_indices_to_patches()
 
         """
         self.index_dic[index_name] = index_formula
@@ -51,9 +49,9 @@ class Dataset:
 
         Example:
 
-            >>>dataset.add_index("NDVI","(B07-B04)/(B07+B04)")
-            >>>dataset.add_index("IRECI","(B07-B04)/(B05/B06)")
-            >>>dataset.save_indices_to_patches()
+            >>> dataset.add_index("NDVI","(B07-B04)/(B07+B04)")
+            >>> dataset.add_index("IRECI","(B07-B04)/(B05/B06)")
+            >>> dataset.save_indices_to_patches()
         """
         load = LoadTask(self.eopatches_folder)
         

@@ -173,11 +173,12 @@ class TSPatch(EOPatch):
             value|array: If `is_pixelized` is true returns the value in the shape of the mask, if not, returns a scalar(int).
         
         Example:
+
         >>> patch.get_dataset_entry_value("N",True)
-        [1.9,1.9,1.9,...,1.9,]
+            [1.9,1.9,1.9,...,1.9,]
 
         >>> patch.get_dataset_entry_value("N",False)
-        1.9
+            1.9
         """
         eopatch = self.patch
         mask = self.get_masked_region()
@@ -190,10 +191,10 @@ class TSPatch(EOPatch):
         """Can't remember what this does
 
         Args:
-            include_indices (bool, optional): _description_. Defaults to True.
+            include_indices (bool, optional): Defaults to True.
 
         Returns:
-            _type_: _description_
+            array: ??
         """
 
         mask_filtered = self.get_masked_region();
