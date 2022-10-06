@@ -55,7 +55,7 @@ html_theme = 'sphinx_rtd_theme'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-MOCK_MODULES = ['lxml','numpy', 'geopandas','eo-learn','eolearn','sentinelhub','pandas','skimage','scikit-learn','sklearn','rasterio','gdal','scipy','numba','numpy.core.multiarray']
+MOCK_MODULES = ['shapely','lxml','numpy', 'geopandas','eo-learn','eolearn','sentinelhub','pandas','skimage','scikit-learn','sklearn','rasterio','gdal','scipy','numba','numpy.core.multiarray']
 autodoc_mock_imports = MOCK_MODULES
 
 master_doc = 'index'
