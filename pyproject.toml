@@ -16,6 +16,17 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
+dependencies = [
+  'eo-learn <= 0.9.1',
+  'shapely',
+  'mlflow >= 1.25',
+  'optuna >= 2.10',
+  'sentinelhub',
+  'numpy',
+  'pandas',
+  'geopandas',
+  'sklearn >= 0.24.1'
+]
 
 [project.urls]
 "Homepage" = "https://gitlab.com/manelpereira/terrasensetk"

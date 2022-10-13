@@ -1,4 +1,3 @@
-from sqlalchemy import true
 from ..IAlgorithm import IAlgorithm
 from sklearn.base import clone
 from sklearn.ensemble import RandomForestRegressor as RFR
