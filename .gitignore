@@ -3,3 +3,6 @@ eoexecution-*
 .vscode
 __pycache__
 mlruns
+docs/build
+dist
+venv

@@ -1,0 +1,44 @@
+package:
+  name: "terrasensetk"
+  version: "1.0.0"
+
+source:
+  git_url: https://gitlab.com/ManelPereira/terrasensetk
+  git_rev: v1.0.0
+  
+
+requirements:
+  host:
+    - python
+  build:
+    - python
+    - mlflow
+    - geopandas
+    - scikit-learn
+    - sentinelhub
+    - eo-learn
+  run:
+    - python
+    - mlflow
+    - sentinelhub
+    - eo-learn
+    - optuna
+    - copy
+    - scikit-learn
+
+test:
+  imports:
+    - terrasensetk
+
+about:
+  home: https://gitlab.com/ManelPereira/terrasensetk
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: "A Toolkit for Remote Soil Sensing Analysis"
+
+extra:
+  recipe-maintainers:
+    - manelpereira98
+    - rafaelmcandeias
+
