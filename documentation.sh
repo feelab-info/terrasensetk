@@ -1,9 +1,10 @@
-MODULE_PATHS=(terrasensetk)
-SOURCE_DIR=docs
-BUILD_DIR=docs/build
+MODULE_PATHS=$@
+SOURCE_DIR=docs/source
+BUILD_DIR=docs
 
 for MODULE_PATH in $MODULE_PATHS
 do
+echo MODULE_PATH
 # Generate source files from module path
 sphinx-apidoc -f -o $SOURCE_DIR $MODULE_PATH
 done
@@ -16,4 +17,3 @@ sed "s/Contents:/Contents:\n\n   $SOURCE_FILES/g" $SOURCE_DIR/index.tmpl.rst > $
 
 # Generate html documentation from source files
 sphinx-build -b html $SOURCE_DIR $BUILD_DIR
-read -rn1
