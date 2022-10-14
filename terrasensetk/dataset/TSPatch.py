@@ -1,5 +1,6 @@
 from eolearn.core import EOPatch
 import numpy as np
+import datetime as dt
 class TSPatch(EOPatch):
     """Extends the functionality of the original eo-patch implementation with methods to include extra functionality
 
@@ -125,6 +126,7 @@ class TSPatch(EOPatch):
         values = {}
         eopatch = self.patch
         masked_region = self.get_masked_region()
+        nearest_image_index = self._get_index_nearest_to_collection_date()
         for i in range(0,eopatch.data["BANDS"].shape[-1]):
             values[band_names[i]] = eopatch.data["BANDS"][-1,...,i]*masked_region
             if as_array: 
@@ -205,3 +207,17 @@ class TSPatch(EOPatch):
     def load(cls, path, lazy_loading=True):
         eopatch = super().load(path,lazy_loading=lazy_loading)
         return TSPatch(eopatch)
+    
+    def _get_index_nearest_to_collection_date(self):
+        smallest_index = 0
+        smallest_difference = dt.timedelta(days=2000)
+        try:
+            collected_day = dt.datetime.strptime(self.get_dataset_entry_value("SURVEY_DATE"),'%d/%m/%y')
+        except:
+            return -1
+        for i,image_date in enumerate(self.timestamp):
+            current_difference = abs(collected_day - image_date)
+            if(current_difference < smallest_difference):
+                smallest_difference = current_difference
+                smallest_index = i
+        return smallest_index
