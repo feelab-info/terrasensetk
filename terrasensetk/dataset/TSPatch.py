@@ -128,12 +128,12 @@ class TSPatch(EOPatch):
         masked_region = self.get_masked_region()
         nearest_image_index = self._get_index_nearest_to_collection_date()
         for i in range(0,eopatch.data["BANDS"].shape[-1]):
-            values[band_names[i]] = eopatch.data["BANDS"][-1,...,i]*masked_region
+            values[band_names[i]] = eopatch.data["BANDS"][nearest_image_index,...,i]*masked_region
             if as_array: 
                 values[band_names[i]] = values[band_names[i]][masked_region!=0]
         
         for i in indices:
-            values[i] = eopatch.data[i][-1,...,-1]*masked_region
+            values[i] = eopatch.data[i][nearest_image_index,...,-1]*masked_region
             if as_array:
                 values[i] = values[i][masked_region!=0]
         return values
@@ -147,10 +147,12 @@ class TSPatch(EOPatch):
         Returns:
             array: 2D image
         """
+        nearest_image_index = self._get_index_nearest_to_collection_date()
+
         eopatch = self.patch
         mask = self.get_masked_region()
         mask = mask.astype(float)
-        image = eopatch.data["BANDS"][-1][...,[3,2,1]]
+        image = eopatch.data["BANDS"][nearest_image_index][...,[3,2,1]]
         _max = 255#dfeopatches["N"].max()
         _min = 0#dfeopatches["N"].min()
         convert_est = estimation/_max
@@ -199,7 +201,7 @@ class TSPatch(EOPatch):
             array: ??
         """
 
-        mask_filtered = self.get_masked_region();
+        mask_filtered = self.get_masked_region()
         if include_indices : return (mask_filtered,mask_filtered.nonzero())
         return mask_filtered
     
