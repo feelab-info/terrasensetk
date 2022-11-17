@@ -1,4 +1,4 @@
-from terrasensetk.performance.metrics import RegressionMetrics
+from ...performance.metrics import RegressionMetrics
 from ..IAlgorithm import IAlgorithm
 try:
     from xgboost import XGBRegressor
