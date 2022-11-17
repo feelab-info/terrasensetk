@@ -5,7 +5,7 @@ try:
 except:
     pass
 
-class XGBRegressor(IAlgorithm):
+class XGBoostRegressor(IAlgorithm):
     
     def __init__(self,args={},**kwargs):
         model = XGBRegressor

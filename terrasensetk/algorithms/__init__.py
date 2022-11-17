@@ -1,6 +1,6 @@
 from .IAlgorithm import IAlgorithm
 from .Regression import SupportVectorRegression
-from .Regression import SupportVectorRegression
+from .Regression import XGBoostRegressor
 from .Regression import GradientBoostingRegressor
 from .Regression import MLPRegressor
 from .Regression import RandomForestRegressor

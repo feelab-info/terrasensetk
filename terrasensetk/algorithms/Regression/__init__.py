@@ -3,3 +3,4 @@ from .GradientBoostingRegressor import GradientBoostingRegressor
 from .MLPRegressor import MLPRegressor
 from .RandomForestRegressor import RandomForestRegressor
 from .PLSRegressor import PLSRegressor
+from .XGBoostRegressor import XGBoostRegressor
